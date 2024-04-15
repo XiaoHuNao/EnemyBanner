@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.xiaohunao.enemybanner.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "EnemyBanner.refmap.json",
+  "mixins": [
+    "AbstractBannerBlockMixin",
+    "BannerBlockEntityMixin",
+    "LoomMenuMixin"
+  ],
+  "client": [
+    "BannerRendererMixin",
+    "LoomScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
