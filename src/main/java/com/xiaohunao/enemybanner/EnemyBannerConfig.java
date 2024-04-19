@@ -16,8 +16,8 @@ public class EnemyBannerConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         entityTypes = builder
-                .comment("List of entity types that can be displayed on the enemy banner")
-                .defineList("entityTypes", List.of("minecraft:zombie-100"), str -> {
+                .comment("Modify the number of kills required to get a flag from an entity")
+                .defineList("entityTypes", List.of("minecraft:zombie-50"), str -> {
                     if (!(str instanceof String)) {
                         return false;
                     }

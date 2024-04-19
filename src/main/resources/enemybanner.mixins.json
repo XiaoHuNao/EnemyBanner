@@ -7,11 +7,12 @@
   "mixins": [
     "AbstractBannerBlockMixin",
     "BannerBlockEntityMixin",
+    "BannerItemMixin",
+    "ItemStackMixin",
     "LoomMenuMixin"
   ],
   "client": [
-    "BannerRendererMixin",
-    "LoomScreenMixin"
+    "BannerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,10 +1,15 @@
 package com.xiaohunao.enemybanner;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
+import com.xiaohunao.enemybanner.mixin.BannerBlockEntityMixin;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -13,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -23,14 +29,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,66 +52,80 @@ public class EnemyBanner {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, EnemyBanner.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
     public static final DeferredRegister<BannerPattern> BANNER_PATTERNS = DeferredRegister.create(Registries.BANNER_PATTERN, MOD_ID);
+    public static final TagKey<BannerPattern> FUNCTION_SILKS_TAG_KEY = createBannerPatternTagKey("function_silks");
+    public static final TagKey<BannerPattern> COLOR_SILKS_TAG_KEY = createBannerPatternTagKey("color_silks");
 
-    //basic
-    public static final RegistryObject<FunctionBannerPattern> BASIC_PATTEN = BANNER_PATTERNS.register("basic", () -> new FunctionBannerPattern("basic"));
-    public static final RegistryObject<BannerPatternItem> BASIC = ITEMS.register("basic",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("basic"),new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> BASIC_SILKS = BANNER_PATTERNS.register("basic_silks", () -> new BannerPattern("basic_silks"));
+    public static final RegistryObject<BannerPatternItem> BASIC = ITEMS.register("basic_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("basic_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> DAMAGE_SILKS = BANNER_PATTERNS.register("damage_silks", () -> new BannerPattern("damage_silks"));
+    public static final RegistryObject<BannerPatternItem> DAMAGE = ITEMS.register("damage_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("damage_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> INHIBIT_SILKS = BANNER_PATTERNS.register("inhibit_silks", () -> new BannerPattern("inhibit_silks"));
+    public static final RegistryObject<BannerPatternItem> INHIBIT = ITEMS.register("inhibit_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("inhibit_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> LOOT_SILKS = BANNER_PATTERNS.register("loot_silks", () -> new BannerPattern("loot_silks"));
+    public static final RegistryObject<BannerPatternItem> LOOT = ITEMS.register("loot_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("loot_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> PULL_SILKS = BANNER_PATTERNS.register("pull_silks", () -> new BannerPattern("pull_silks"));
+    public static final RegistryObject<BannerPatternItem> PULL = ITEMS.register("pull_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("pull_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> PUSH_SILKS = BANNER_PATTERNS.register("push_silks", () -> new BannerPattern("push_silks"));
+    public static final RegistryObject<BannerPatternItem> PUSH = ITEMS.register("push_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("push_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> RANGE_SILKS = BANNER_PATTERNS.register("range_silks", () -> new BannerPattern("range_silks"));
+    public static final RegistryObject<BannerPatternItem> RANGE = ITEMS.register("range_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("range_silks"), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BannerPattern> RESIST_SILKS = BANNER_PATTERNS.register("resist_silks", () -> new BannerPattern("resist_silks"));
+    public static final RegistryObject<BannerPatternItem> RESIST = ITEMS.register("resist_silks",
+            () -> new BannerPatternItem(createBannerPatternTagKey("resist_silks"), new Item.Properties().stacksTo(1)));
 
-    //damage
-    public static final RegistryObject<FunctionBannerPattern> DAMAGE_PATTEN = BANNER_PATTERNS.register("damage", () -> new FunctionBannerPattern("damage"));
-    public static final RegistryObject<BannerPatternItem> DAMAGE = ITEMS.register("damage",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("damage"),new Item.Properties().stacksTo(1)));
-    //inhibit
-    public static final RegistryObject<FunctionBannerPattern> INHIBIT_PATTEN = BANNER_PATTERNS.register("inhibit", () -> new FunctionBannerPattern("inhibit"));
-    public static final RegistryObject<BannerPatternItem> INHIBIT = ITEMS.register("inhibit",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("inhibit"),new Item.Properties().stacksTo(1)));
-    //loot
-    public static final RegistryObject<FunctionBannerPattern> LOOT_PATTEN = BANNER_PATTERNS.register("loot", () -> new FunctionBannerPattern("loot"));
-    public static final RegistryObject<BannerPatternItem> LOOT = ITEMS.register("loot",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("loot"),new Item.Properties().stacksTo(1)));
-    //pull
-    public static final RegistryObject<FunctionBannerPattern> PULL_PATTEN = BANNER_PATTERNS.register("pull", () -> new FunctionBannerPattern("pull"));
-    public static final RegistryObject<BannerPatternItem> PULL = ITEMS.register("pull",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("pull"),new Item.Properties().stacksTo(1)));
-    //push
-    public static final RegistryObject<FunctionBannerPattern> PUSH_PATTEN = BANNER_PATTERNS.register("push", () -> new FunctionBannerPattern("push"));
-    public static final RegistryObject<BannerPatternItem> PUSH = ITEMS.register("push",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("push"),new Item.Properties().stacksTo(1)));
-    //range
-    public static final RegistryObject<FunctionBannerPattern> RANGE_PATTEN = BANNER_PATTERNS.register("range", () -> new FunctionBannerPattern("range"));
-    public static final RegistryObject<BannerPatternItem> RANGE = ITEMS.register("range",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("range"),new Item.Properties().stacksTo(1)));
-    //resist
-    public static final RegistryObject<FunctionBannerPattern> RESIST_PATTEN = BANNER_PATTERNS.register("resist", () -> new FunctionBannerPattern("resist"));
-    public static final RegistryObject<BannerPatternItem> RESIST = ITEMS.register("resist",
-            () -> new  BannerPatternItem(createBannerPatternTagKey("resist"),new Item.Properties().stacksTo(1)));
+    //16色的bannerSilks
+    //white
+    public static final RegistryObject<BannerPattern> WHITE_SILKS = BANNER_PATTERNS.register("white_silks", () -> new BannerPattern("white_silks"));
+    public static final RegistryObject<BannerPattern> ORANGE_SILKS = BANNER_PATTERNS.register("orange_silks", () -> new BannerPattern("orange_silks"));
+    public static final RegistryObject<BannerPattern> MAGENTA_SILKS = BANNER_PATTERNS.register("magenta_silks", () -> new BannerPattern("magenta_silks"));
+    public static final RegistryObject<BannerPattern> LIGHT_BLUE_SILKS = BANNER_PATTERNS.register("light_blue_silks", () -> new BannerPattern("light_blue_silks"));
+    public static final RegistryObject<BannerPattern> YELLOW_SILKS = BANNER_PATTERNS.register("yellow_silks", () -> new BannerPattern("yellow_silks"));
+    public static final RegistryObject<BannerPattern> LIME_SILKS = BANNER_PATTERNS.register("lime_silks", () -> new BannerPattern("lime_silks"));
+    public static final RegistryObject<BannerPattern> PINK_SILKS = BANNER_PATTERNS.register("pink_silks", () -> new BannerPattern("pink_silks"));
+    public static final RegistryObject<BannerPattern> GRAY_SILKS = BANNER_PATTERNS.register("gray_silks", () -> new BannerPattern("gray_silks"));
+    public static final RegistryObject<BannerPattern> LIGHT_GRAY_SILKS = BANNER_PATTERNS.register("light_gray_silks", () -> new BannerPattern("light_gray_silks"));
+    public static final RegistryObject<BannerPattern> CYAN_SILKS = BANNER_PATTERNS.register("cyan_silks", () -> new BannerPattern("cyan_silks"));
+    public static final RegistryObject<BannerPattern> PURPLE_SILKS = BANNER_PATTERNS.register("purple_silks", () -> new BannerPattern("purple_silks"));
+    public static final RegistryObject<BannerPattern> BLUE_SILKS = BANNER_PATTERNS.register("blue_silks", () -> new BannerPattern("blue_silks"));
+    public static final RegistryObject<BannerPattern> BROWN_SILKS = BANNER_PATTERNS.register("brown_silks", () -> new BannerPattern("brown_silks"));
+    public static final RegistryObject<BannerPattern> GREEN_SILKS = BANNER_PATTERNS.register("green_silks", () -> new BannerPattern("green_silks"));
+    public static final RegistryObject<BannerPattern> RED_SILKS = BANNER_PATTERNS.register("red_silks", () -> new BannerPattern("red_silks"));
+    public static final RegistryObject<BannerPattern> BLACK_SILKS = BANNER_PATTERNS.register("black_silks", () -> new BannerPattern("black_silks"));
 
 
-
-
-
-//    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("tab", () -> CreativeModeTab.builder()
-//            .withTabsBefore(CreativeModeTabs.COMBAT)
-//            .icon(() -> appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE)))
-//            .displayItems((parameters, output) -> {
-//                ForgeRegistries.ENTITY_TYPES.getEntries().stream()
-//                        .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
-//                        .forEach(entry -> {
-//                            EntityType<?> value = entry.getValue();
-//                            output.accept(appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(value)));
-//                        });
-//            }).build());
+    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("tab", () -> CreativeModeTab.builder()
+            .withTabsBefore(CreativeModeTabs.COMBAT)
+            .icon(() -> BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()))
+            .displayItems((parameters, output) -> {
+                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
+                output.accept(BASIC.get());
+                output.accept(DAMAGE.get());
+                output.accept(INHIBIT.get());
+                output.accept(LOOT.get());
+                output.accept(PULL.get());
+                output.accept(PUSH.get());
+                output.accept(RANGE.get());
+                output.accept(RESIST.get());
+            }).build());
 
     public EnemyBanner() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::register);
+        modEventBus.addListener(this::onFMLCommonSetup);
 
         ITEMS.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
         BANNER_PATTERNS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, EnemyBannerConfig.CONFIG, MOD_ID + ".toml");
     }
 
     @SubscribeEvent
@@ -120,121 +145,18 @@ public class EnemyBanner {
         );
     }
 
-    public static void serverBannerBlockTick(Level level, BlockPos pos, BlockState blockState, BannerBlockEntity bannerBlockEntity) {
 
-    }
+
     public static ResourceLocation asResource(String path) {
         return new ResourceLocation(MOD_ID, path);
     }
+
     private static TagKey<BannerPattern> createBannerPatternTagKey(String key) {
         return TagKey.create(Registries.BANNER_PATTERN, asResource(key));
     }
-
-    public static ItemStack appendEntityPattern(ItemStack stack, EntityBannerPattern entityBannerPattern,FunctionBannerPattern functionBannerPattern) {
-        CompoundTag bannerTag = stack.getOrCreateTag();
-        CompoundTag blockEntityTag = new CompoundTag();
-        ListTag patternsTag = new ListTag();
-
-
-        CompoundTag functionCompoundTag = new CompoundTag();
-        functionCompoundTag.putString("Pattern", functionBannerPattern.getHashname());
-        functionCompoundTag.putInt("Color", 10);
-        patternsTag.add(functionCompoundTag);
-
-
-        CompoundTag entityPatternTag = new CompoundTag();
-        ResourceLocation id = EntityType.getKey(entityBannerPattern.entityType);
-        entityPatternTag.putString("Pattern", id.toLanguageKey());
-        entityPatternTag.putInt("Color", 10);
-        patternsTag.add(entityPatternTag);
-
-
-        blockEntityTag.put("Patterns", patternsTag);
-        bannerTag.put("BlockEntityTag", blockEntityTag);
-        return stack;
+    @SubscribeEvent
+    public void onFMLCommonSetup(FMLCommonSetupEvent event) {
+        EnemyBannerConfig.loadEntityKillCount();
     }
-    public static boolean hasEntityPattern(ItemStack stack) {
-        CompoundTag compoundtag = BlockItem.getBlockEntityData(stack);
-        if (compoundtag != null && compoundtag.contains("Patterns")) {
-            ListTag listtag = compoundtag.getList("Patterns", 10);
-
-            for (Tag tag : listtag) {
-                CompoundTag compoundtag1 = (CompoundTag) tag;
-                Holder<BannerPattern> pattern = BannerPattern.byHash(compoundtag1.getString("Pattern"));
-                if (pattern != null && pattern.value() instanceof EntityBannerPattern) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    public static List<Holder<BannerPattern>> getPatterns(ItemStack stack) {
-        CompoundTag compoundtag = BlockItem.getBlockEntityData(stack);
-        if (compoundtag != null && compoundtag.contains("Patterns")) {
-            ListTag listtag = compoundtag.getList("Patterns", 10);
-            return listtag.stream()
-                    .map(tag -> (CompoundTag) tag)
-                    .map(tag -> BannerPattern.byHash(tag.getString("Pattern")))
-                    .filter(Objects::nonNull)
-                    .toList();
-        }
-        return List.of();
-    }
-
-
-    public static List<Holder<BannerPattern>> getEntityPatterns(ItemStack stack) {
-        CompoundTag compoundtag = BlockItem.getBlockEntityData(stack);
-        if (compoundtag != null && compoundtag.contains("Patterns")) {
-            ListTag listtag = compoundtag.getList("Patterns", 10);
-            return listtag.stream()
-                    .map(tag -> (CompoundTag) tag)
-                    .map(tag -> BannerPattern.byHash(tag.getString("Pattern")))
-                    .filter(Objects::nonNull)
-                    .filter(holder -> holder.value() instanceof EntityBannerPattern)
-                    .toList();
-        }
-        return List.of();
-    }
-
-    public static void clearEntityPatterns(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("BlockEntityTag")) {
-            CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
-            if (blockEntityTag.contains("Patterns")) {
-                ListTag patternsTag = blockEntityTag.getList("Patterns", 10);
-                patternsTag.removeIf(pattern -> {
-                    CompoundTag compoundTag = (CompoundTag) pattern;
-                    Holder<BannerPattern> holder = BannerPattern.byHash(compoundTag.getString("Pattern"));
-                    return holder != null && holder.value() instanceof EntityBannerPattern;
-                });
-                blockEntityTag.put("Patterns", patternsTag);
-                tag.put("BlockEntityTag", blockEntityTag);
-                stack.setTag(tag);
-            }
-        }
-    }
-
-    //给List<Pattern>排序，,list里面只有一个EntityBannerPattern，和一个基础Base，其他的都是普通的Pattern，确保EntityBannerPattern在最后面
-    public static void sortEntityPatterns(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("BlockEntityTag")) {
-            CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
-            if (blockEntityTag.contains("Patterns")) {
-                ListTag patternsTag = blockEntityTag.getList("Patterns", 10);
-                for (Tag tag1 : patternsTag) {
-                    CompoundTag compoundTag = (CompoundTag) tag1;
-                    Holder<BannerPattern> holder = BannerPattern.byHash(compoundTag.getString("Pattern"));
-                    if (holder != null && holder.value() instanceof EntityBannerPattern) {
-                        patternsTag.remove(tag1);
-                        patternsTag.add(tag1);
-                        break;
-                    }
-                }
-                blockEntityTag.put("Patterns", patternsTag);
-                tag.put("BlockEntityTag", blockEntityTag);
-                stack.setTag(tag);
-            }
-        }
-    }
-
 }
+

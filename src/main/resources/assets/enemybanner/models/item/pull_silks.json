@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "enemybanner:item/loot"
+    "layer0": "enemybanner:item/pull_silks"
   }
 }

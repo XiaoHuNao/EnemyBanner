@@ -1,21 +1,21 @@
 package com.xiaohunao.enemybanner.mixin;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.xiaohunao.enemybanner.BannerUtil;
 import com.xiaohunao.enemybanner.EnemyBanner;
-import com.xiaohunao.enemybanner.EnemyBannerCap;
+import com.xiaohunao.enemybanner.EntityBannerPattern;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.tags.BannerPatternTags;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.*;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(LoomMenu.class)
@@ -50,13 +49,20 @@ public abstract class LoomMenuMixin extends AbstractContainerMenu {
         ItemStack dyeStack = dyeSlot.getItem();
         ItemStack patternStack = patternSlot.getItem();
 
-        if (EnemyBanner.hasEntityPattern(bannerStack) && !dyeStack.isEmpty()) {
+        if (BannerUtil.hasEntityPattern(bannerStack)){
             int i = this.selectedBannerPatternIndex.get();
             boolean flag = this.isValidPatternIndex(i);
             List<Holder<BannerPattern>> list = this.selectablePatterns;
-//            this.selectablePatterns = this.getSelectablePatterns(patternStack);
-//            this.selectablePatterns.addAll(EnemyBanner.getEntityPatterns(bannerStack));
-            this.selectablePatterns = EnemyBanner.getEntityPatterns(bannerStack);
+            List<Holder<BannerPattern>> list1 = Lists.newLinkedList();
+
+            if (!dyeStack.isEmpty() && dyeStack.getItem() instanceof DyeItem dyeItem){
+                list1.add(BannerPattern.byHash(BannerUtil.getDyeSilkPattern(dyeItem).getHashname()));
+            }
+            if (!patternStack.isEmpty() && patternStack.getItem() instanceof BannerPatternItem bannerPatternItem){
+                list1.addAll(BuiltInRegistries.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of()));
+            }
+            this.selectablePatterns = list1;
+
 
 
             Holder<BannerPattern> holder;
@@ -95,26 +101,24 @@ public abstract class LoomMenuMixin extends AbstractContainerMenu {
             }
 
             this.broadcastChanges();
-            ci.cancel();
-        } else {
-            this.resultSlot.set(ItemStack.EMPTY);
-            this.selectablePatterns = List.of();
-            this.selectedBannerPatternIndex.set(-1);
-        }
 
+
+
+
+
+            ci.cancel();
+        }
     }
 
 
 
     @Inject(method = "setupResultSlot", at = @At("HEAD"), cancellable = true)
-    private void setupResultSlot(Holder<BannerPattern> p_219992_, CallbackInfo ci) {
+    private void setupResultSlot(Holder<BannerPattern> bannerPatternHolder, CallbackInfo ci) {
         ItemStack itemstack = this.bannerSlot.getItem();
         ItemStack itemstack1 = this.dyeSlot.getItem();
         ItemStack itemstack2 = ItemStack.EMPTY;
-        if (EnemyBanner.hasEntityPattern(itemstack) && !itemstack1.isEmpty()) {
+        if (BannerUtil.hasEntityPattern(itemstack)) {
             itemstack2 = itemstack.copyWithCount(1);
-            EnemyBanner.clearEntityPatterns(itemstack2);
-            DyeColor dyecolor = ((DyeItem)itemstack1.getItem()).getDyeColor();
             CompoundTag compoundtag = BlockItem.getBlockEntityData(itemstack2);
             ListTag listtag;
             if (compoundtag != null && compoundtag.contains("Patterns", 9)) {
@@ -127,10 +131,8 @@ public abstract class LoomMenuMixin extends AbstractContainerMenu {
 
                 compoundtag.put("Patterns", listtag);
             }
-            CompoundTag compoundtag1 = new CompoundTag();
-            compoundtag1.putString("Pattern", p_219992_.value().getHashname());
-            compoundtag1.putInt("Color", dyecolor.getId());
-            listtag.add(compoundtag1);
+            BannerUtil.replacePattern(listtag, bannerPatternHolder.get());
+
             BlockItem.setBlockEntityData(itemstack2, BlockEntityType.BANNER, compoundtag);
 
             if (!ItemStack.matches(itemstack2, this.resultSlot.getItem())) {

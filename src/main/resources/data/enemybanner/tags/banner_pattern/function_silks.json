@@ -1,0 +1,12 @@
+{
+  "values": [
+    "enemybanner:basic_silks",
+    "enemybanner:damage_silks",
+    "enemybanner:inhibit_silks",
+    "enemybanner:loot_silks",
+    "enemybanner:pull_silks",
+    "enemybanner:push_silks",
+    "enemybanner:range_silks",
+    "enemybanner:resist_silks"
+  ]
+}

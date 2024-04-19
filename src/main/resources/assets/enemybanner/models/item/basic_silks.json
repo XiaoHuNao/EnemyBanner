@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "enemybanner:item/basic"
+    "layer0": "enemybanner:item/basic_silks"
   }
 }

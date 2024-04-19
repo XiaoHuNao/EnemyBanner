@@ -1,80 +1,157 @@
 package com.xiaohunao.enemybanner.mixin;
 
-import com.xiaohunao.enemybanner.EnemyBannerCap;
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
+import com.xiaohunao.enemybanner.EnemyBanner;
+import com.xiaohunao.enemybanner.EntityBannerPattern;
+import com.xiaohunao.enemybanner.mixed.IEnemyBannerBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 @Mixin(BannerBlockEntity.class)
-public abstract class BannerBlockEntityMixin extends BlockEntity{
-    @Unique
-    private LazyOptional<EnemyBannerCap> bannerCap = LazyOptional.of(EnemyBannerCap::new);
+public abstract class BannerBlockEntityMixin extends BlockEntity implements IEnemyBannerBlockEntity {
+
+    @Shadow public abstract List<Pair<Holder<BannerPattern>, DyeColor>> getPatterns();
+
+    @Unique private int range = 16;
+    @Unique private float resist = 0.3F;
+    @Unique private float damage = 0.5F;
+    @Unique private int looting = 0;
+    @Unique private boolean push = false;
+    @Unique private boolean pull = false;
+    @Unique private boolean inhibitory = false;
+    @Unique private EntityType<?> entityType;
+    @Unique private List<LivingEntity> entities = Lists.newArrayList();
 
 
     public BannerBlockEntityMixin(BlockEntityType<?> p_155228_, BlockPos p_155229_, BlockState p_155230_) {
         super(p_155228_, p_155229_, p_155230_);
     }
 
+    @Override
+    public void serverBannerBlockTick(Level level, BlockPos pos, BlockState blockState, BannerBlockEntity bannerBlockEntity){
+        updateData(bannerBlockEntity);
+        updateEntities();
+    }
 
-    @Inject(method = "load", at = @At("HEAD"))
-    public void load(CompoundTag p_155232_, CallbackInfo p_155233_) {
-        if (p_155232_.contains("enemyBannerCap")) {
-            this.bannerCap.ifPresent(cap -> {
-                cap.deserializeNBT(p_155232_.getCompound("enemyBannerCap"));
-                setChanged();
-            });
+    private void updateEntities() {
+        List<?> entitiesInRange = getEntitiesInRange();
+        for (Object object : entitiesInRange) {
+            if (object instanceof LivingEntity livingEntity) {
+                if(!entities.contains(livingEntity)) {
+                    entities.add(livingEntity);
+                    livingEntity.getPersistentData().putLong("Banner", getBlockPos().asLong());
+                }
+            }
+        }
+
+        entities.removeIf(entity -> !entitiesInRange.contains(entity));
+        for (LivingEntity entity : entities) {
+            if (!entitiesInRange.contains(entity)) {
+                entity.getPersistentData().remove("Banner");
+            }
         }
     }
 
-    @Inject(method = "saveAdditional", at = @At("HEAD"))
-    public void saveAdditional(CompoundTag p_155234_, CallbackInfo p_155235_) {
-        this.bannerCap.ifPresent(cap -> {
-            p_155234_.put("enemyBannerCap", cap.serializeNBT());
-            setChanged();
+    private void updateData(BannerBlockEntity bannerBlockEntity) {
+        List<Pair<Holder<BannerPattern>, DyeColor>> patterns = getPatterns();
+        patterns.forEach(pair -> {
+            BannerPattern value = pair.getFirst().value();
+            if (value instanceof EntityBannerPattern entityBannerPattern) {
+                this.entityType = entityBannerPattern.entityType;
+            }
+            if (value == EnemyBanner.RANGE_SILKS.get()) {
+                this.range = 32;
+            }
+            if (value == EnemyBanner.DAMAGE_SILKS.get()) {
+                this.damage = 1.0F;
+            }
+            if (value == EnemyBanner.RESIST_SILKS.get()) {
+                this.resist = 0.1F;
+            }
+            if (value == EnemyBanner.INHIBIT_SILKS.get()) {
+                this.inhibitory = true;
+            }
+            if (value == EnemyBanner.LOOT_SILKS.get()) {
+                this.looting = 3;
+            }
+            if (value == EnemyBanner.PULL_SILKS.get()) {
+                this.pull = true;
+            }
+            if (value == EnemyBanner.PUSH_SILKS.get()) {
+                this.push = true;
+            }
+            if (value == EnemyBanner.BASIC_SILKS.get()) {
+                this.range = 16;
+                this.damage = 0.5F;
+                this.resist = 0.3F;
+                this.looting = 0;
+                this.pull = false;
+                this.push = false;
+                this.inhibitory = false;
+            }
         });
     }
 
-    @Override
-    @NotNull
-    public CompoundTag getUpdateTag() {
-        CompoundTag compoundTag = this.saveWithoutMetadata();
-        this.bannerCap.ifPresent(cap -> {
-            compoundTag.put("enemyBannerCap", cap.serializeNBT());
-            setChanged();
-        });
-        return compoundTag;
+
+    private List<?> getEntitiesInRange() {
+        if (this.level != null){
+            BlockPos blockPos = getBlockPos();
+            AABB aabb = new AABB(blockPos.offset(-range, -range, -range), blockPos.offset(range, range, range));
+            return level.getEntities(entityType, aabb, entity -> true);
+        }
+        return List.of();
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag p_155231_) {
-        super.handleUpdateTag(p_155231_);
-        if (p_155231_.contains("enemyBannerCap")) {
-            this.bannerCap.ifPresent(cap -> {
-                cap.deserializeNBT(p_155231_.getCompound("enemyBannerCap"));
-                setChanged();
-            });
-        }
+    public int getRange() {
+        return range;
     }
-
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == EnemyBannerCap.CAP) {
-            return this.bannerCap.cast();
-        }
-        return super.getCapability(cap);
+    public float getResist() {
+        return resist;
+    }
+    @Override
+    public float getDamage() {
+        return damage;
+    }
+    @Override
+    public int getLooting() {
+        return looting;
+    }
+    @Override
+    public boolean isPush() {
+        return push;
+    }
+    @Override
+    public boolean isPull() {
+        return pull;
+    }
+    @Override
+    public boolean isInhibitory() {
+        return inhibitory;
+    }
+    @Override
+    public EntityType<?> getEntityType() {
+        return entityType;
+    }
+    @Override
+    public List<LivingEntity> getEntities() {
+        return entities;
     }
 }
