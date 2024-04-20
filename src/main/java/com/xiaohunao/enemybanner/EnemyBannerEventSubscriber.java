@@ -12,7 +12,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -30,6 +36,10 @@ public class EnemyBannerEventSubscriber {
         Entity entity = source.getEntity();
         LivingEntity livingEntity = event.getEntity();
         String entityType = EntityType.getKey(livingEntity.getType()).toString();
+        if (EnemyBannerConfig.entityBlackList.get().contains(entityType) || entity == null) {
+            return;
+        }
+
         if(livingEntity.level().isClientSide()) {
             return;
         }
@@ -156,5 +166,44 @@ public class EnemyBannerEventSubscriber {
         EntityBannerPattern entityBannerPattern = EnemyBanner.ENTITY_BANNER_PATTERNS.get(type);
         ItemStack itemStack = BannerUtil.appendEntityPattern(mainHandItem, entityBannerPattern,EnemyBanner.BASIC_SILKS.get(),EnemyBanner.WHITE_SILKS.get());
         player.setItemInHand(hand, itemStack);
+    }
+
+    @SubscribeEvent
+    public static void modifyVanillaLootPools(final LootTableLoadEvent event) {
+        //沙漠金字塔
+        if (event.getName().equals(BuiltInLootTables.DESERT_PYRAMID)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.RESIST.get()).setWeight(1)).build());
+        }
+        //掠夺者前哨站
+        if (event.getName().equals(BuiltInLootTables.PILLAGER_OUTPOST)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.PULL.get()).setWeight(1)).build());
+        }
+        //堡垒遗迹
+        if (event.getName().equals(BuiltInLootTables.BASTION_HOGLIN_STABLE)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.DAMAGE.get()).setWeight(1)).build());
+        }
+        //要塞
+        if (event.getName().equals(BuiltInLootTables.STRONGHOLD_LIBRARY)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.LOOT.get()).setWeight(1)).build());
+        }
+        //林地府邸
+        if (event.getName().equals(BuiltInLootTables.WOODLAND_MANSION)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.PUSH.get()).setWeight(1)).build());
+        }
+        //猪灵交易
+        if (event.getName().equals(BuiltInLootTables.PIGLIN_BARTERING)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.RANGE.get()).setWeight(1)).build());
+        }
+        //末地城
+        if (event.getName().equals(BuiltInLootTables.END_CITY_TREASURE)){
+            event.getTable().addPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(EnemyBanner.INHIBIT.get()).setWeight(1)).build());
+        }
     }
 }

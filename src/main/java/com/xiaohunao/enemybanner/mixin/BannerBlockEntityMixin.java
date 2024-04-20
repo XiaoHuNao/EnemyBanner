@@ -28,10 +28,10 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
 
     @Shadow public abstract List<Pair<Holder<BannerPattern>, DyeColor>> getPatterns();
 
-    @Unique private int range = 16;
-    @Unique private float resist = 0.3F;
-    @Unique private float damage = 0.5F;
-    @Unique private int looting = 0;
+    @Unique private int range = 16; //32
+    @Unique private float resist = 0.3F; //0.5
+    @Unique private float damage = 0.5F; //1.0
+    @Unique private int looting = 0; //3
     @Unique private boolean push = false;
     @Unique private boolean pull = false;
     @Unique private boolean inhibitory = false;
@@ -82,13 +82,13 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
                 this.damage = 1.0F;
             }
             if (value == EnemyBanner.RESIST_SILKS.get()) {
-                this.resist = 0.1F;
-            }
-            if (value == EnemyBanner.INHIBIT_SILKS.get()) {
-                this.inhibitory = true;
+                this.resist = 0.5F;
             }
             if (value == EnemyBanner.LOOT_SILKS.get()) {
                 this.looting = 3;
+            }
+            if (value == EnemyBanner.INHIBIT_SILKS.get()) {
+                this.inhibitory = true;
             }
             if (value == EnemyBanner.PULL_SILKS.get()) {
                 this.pull = true;

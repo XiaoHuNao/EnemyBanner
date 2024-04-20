@@ -1,0 +1,19 @@
+{
+  "item.enemybanner.basic_silks": "Basic Silks",
+  "item.enemybanner.basic_silks.desc": "Basic Silks",
+  "item.enemybanner.damage_silks": "Damage Silks",
+  "item.enemybanner.damage_silks.desc": "Damage Silks",
+  "item.enemybanner.enemy_banner": "Enemy Banner",
+  "item.enemybanner.inhibit_silks": "Inhibit Silks",
+  "item.enemybanner.inhibit_silks.desc": "Inhibit Silks",
+  "item.enemybanner.loot_silks": "Loot Silks",
+  "item.enemybanner.loot_silks.desc": "Loot Silks",
+  "item.enemybanner.pull_silks": "Pull Silks",
+  "item.enemybanner.pull_silks.desc": "Pull Silks",
+  "item.enemybanner.push_silks": "Push Silks",
+  "item.enemybanner.push_silks.desc": "Push Silks",
+  "item.enemybanner.range_silks": "Range Silks",
+  "item.enemybanner.range_silks.desc": "Range Silks",
+  "item.enemybanner.resist_silks": "Resist Silks",
+  "item.enemybanner.resist_silks.desc": "Resist Silks"
+}

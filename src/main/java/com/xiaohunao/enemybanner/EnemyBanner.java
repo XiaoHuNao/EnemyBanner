@@ -151,7 +151,7 @@ public class EnemyBanner {
         return new ResourceLocation(MOD_ID, path);
     }
 
-    private static TagKey<BannerPattern> createBannerPatternTagKey(String key) {
+    public static TagKey<BannerPattern> createBannerPatternTagKey(String key) {
         return TagKey.create(Registries.BANNER_PATTERN, asResource(key));
     }
     @SubscribeEvent

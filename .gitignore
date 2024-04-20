@@ -1,10 +1,10 @@
 # User-specific stuff
 .idea/
-
+.cache/
+run-data/
 *.iml
 *.ipr
 *.iws
-
 # IntelliJ
 out/
 # mpeltonen/sbt-idea plugin
