@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "com.xiaohunao.enemybanner.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "EnemyBanner.refmap.json",
+  "refmap": "enemybanner.refmap.json",
   "mixins": [
     "AbstractBannerBlockMixin",
     "BannerBlockEntityMixin",
