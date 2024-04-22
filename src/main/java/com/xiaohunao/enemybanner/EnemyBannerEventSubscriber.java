@@ -2,21 +2,25 @@ package com.xiaohunao.enemybanner;
 
 import com.xiaohunao.enemybanner.mixed.IEnemyBannerBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
@@ -26,6 +30,8 @@ import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.List;
 
 
 @Mod.EventBusSubscriber
@@ -114,13 +120,11 @@ public class EnemyBannerEventSubscriber {
         int lootingLevel = event.getLootingLevel();
         DamageSource damageSource = event.getDamageSource();
         LivingEntity livingEntity = event.getEntity();
-        Entity sourceEntity = damageSource.getEntity();
         Level level = livingEntity.level();
         if (level.isClientSide()) {
             return;
         }
-
-        if (sourceEntity instanceof Player player) {
+        if (damageSource != null && damageSource.getEntity() instanceof Player) {
             LazyOptional<IEnemyBannerBlockEntity> enemyBanner = getBannerBlockEntity(livingEntity);
             enemyBanner.ifPresent(blockEntity -> {
                 int looting = blockEntity.getLooting();
@@ -145,8 +149,8 @@ public class EnemyBannerEventSubscriber {
 
     private static LazyOptional<IEnemyBannerBlockEntity> getBannerBlockEntity(LivingEntity entity) {
         CompoundTag persistentData = entity.getPersistentData();
-        if (persistentData.contains("Banner")) {
-            BlockPos blockPos = BlockPos.of(persistentData.getLong("Banner"));
+        if (persistentData.contains("BannerPos")) {
+            BlockPos blockPos = BlockPos.of(persistentData.getLong("BannerPos"));
             if (entity.level().getBlockEntity(blockPos) instanceof IEnemyBannerBlockEntity blockEntity) return LazyOptional.of(() -> blockEntity);
         }
         return LazyOptional.empty();

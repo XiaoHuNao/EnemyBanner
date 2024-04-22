@@ -55,7 +55,7 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
             if (object instanceof LivingEntity livingEntity) {
                 if(!entities.contains(livingEntity)) {
                     entities.add(livingEntity);
-                    livingEntity.getPersistentData().putLong("Banner", getBlockPos().asLong());
+                    livingEntity.getPersistentData().putLong("BannerPos", getBlockPos().asLong());
                 }
             }
         }
@@ -63,7 +63,7 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
         entities.removeIf(entity -> !entitiesInRange.contains(entity));
         for (LivingEntity entity : entities) {
             if (!entitiesInRange.contains(entity)) {
-                entity.getPersistentData().remove("Banner");
+                entity.getPersistentData().remove("BannerPos");
             }
         }
     }
