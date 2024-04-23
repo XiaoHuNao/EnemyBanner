@@ -118,13 +118,12 @@ public class EnemyBannerEventSubscriber {
     @SubscribeEvent
     public static void looting(LootingLevelEvent event) {
         int lootingLevel = event.getLootingLevel();
-        DamageSource damageSource = event.getDamageSource();
         LivingEntity livingEntity = event.getEntity();
         Level level = livingEntity.level();
         if (level.isClientSide()) {
             return;
         }
-        if (damageSource != null && damageSource.getEntity() instanceof Player) {
+        if (event.getDamageSource() != null && event.getDamageSource().getEntity() instanceof Player) {
             LazyOptional<IEnemyBannerBlockEntity> enemyBanner = getBannerBlockEntity(livingEntity);
             enemyBanner.ifPresent(blockEntity -> {
                 int looting = blockEntity.getLooting();
@@ -174,37 +173,30 @@ public class EnemyBannerEventSubscriber {
 
     @SubscribeEvent
     public static void modifyVanillaLootPools(final LootTableLoadEvent event) {
-        //沙漠金字塔
         if (event.getName().equals(BuiltInLootTables.DESERT_PYRAMID)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.RESIST.get()).setWeight(1)).build());
         }
-        //掠夺者前哨站
         if (event.getName().equals(BuiltInLootTables.PILLAGER_OUTPOST)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.PULL.get()).setWeight(1)).build());
         }
-        //堡垒遗迹
         if (event.getName().equals(BuiltInLootTables.BASTION_HOGLIN_STABLE)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.DAMAGE.get()).setWeight(1)).build());
         }
-        //要塞
         if (event.getName().equals(BuiltInLootTables.STRONGHOLD_LIBRARY)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.LOOT.get()).setWeight(1)).build());
         }
-        //林地府邸
         if (event.getName().equals(BuiltInLootTables.WOODLAND_MANSION)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.PUSH.get()).setWeight(1)).build());
         }
-        //猪灵交易
         if (event.getName().equals(BuiltInLootTables.PIGLIN_BARTERING)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.RANGE.get()).setWeight(1)).build());
         }
-        //末地城
         if (event.getName().equals(BuiltInLootTables.END_CITY_TREASURE)){
             event.getTable().addPool(LootPool.lootPool()
                     .add(LootItem.lootTableItem(EnemyBanner.INHIBIT.get()).setWeight(1)).build());
