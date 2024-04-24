@@ -16,5 +16,6 @@
   "item.enemybanner.range_silks.desc": "范围绸缎",
   "item.enemybanner.resist_silks": "抵抗绸缎",
   "item.enemybanner.resist_silks.desc": "抵抗绸缎",
-  "tab.enemybanne.tab_title": "敌怪旗"
+  "tab.enemybanne.tab_title": "敌怪旗",
+  "tell.enemybanner.kill_entity": "%s 已经打败了 %s 个 %s"
 }

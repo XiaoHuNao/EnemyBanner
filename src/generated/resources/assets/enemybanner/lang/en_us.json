@@ -16,5 +16,6 @@
   "item.enemybanner.range_silks.desc": "Range Silks",
   "item.enemybanner.resist_silks": "Resist Silks",
   "item.enemybanner.resist_silks.desc": "Resist Silks",
-  "tab.enemybanne.tab_title": "Enemy Banner"
+  "tab.enemybanne.tab_title": "Enemy Banner",
+  "tell.enemybanner.kill_entity": "%s has defeated the %s-th %s!"
 }

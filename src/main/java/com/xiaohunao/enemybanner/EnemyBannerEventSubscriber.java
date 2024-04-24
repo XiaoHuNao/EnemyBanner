@@ -6,6 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -66,10 +67,12 @@ public class EnemyBannerEventSubscriber {
             }
 
             int killCount = EnemyBannerConfig.getKillCount(entityType);
-            if (compoundTag.getInt(entityType) >= killCount) {
-                ItemStack itemStack = BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), EnemyBanner.ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), EnemyBanner.BASIC_SILKS.get(), EnemyBanner.WHITE_SILKS.get());
+            int anInt = compoundTag.getInt(entityType);
+            if (anInt % killCount == 0) {
+                EntityType<?> type = EntityType.byString(entityType).orElse(EntityType.ZOMBIE);
+                ItemStack itemStack = BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), EnemyBanner.ENTITY_BANNER_PATTERNS.get(type), EnemyBanner.BASIC_SILKS.get(), EnemyBanner.WHITE_SILKS.get());
                 player.addItem(itemStack);
-                compoundTag.remove(entityType);
+                player.sendSystemMessage(Component.translatable("tell.enemybanner.kill_entity", player.getDisplayName(),anInt,type.getDescription()));
             }
             persistentData.put("enemy_banner_kill_count", compoundTag);
         }

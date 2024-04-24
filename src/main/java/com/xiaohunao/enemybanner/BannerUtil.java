@@ -1,6 +1,10 @@
 package com.xiaohunao.enemybanner;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.xiaohunao.enemybanner.mixed.IEnemyBannerBlockEntity;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -9,6 +13,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -17,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.Objects;
@@ -153,5 +159,33 @@ public class BannerUtil {
             IEnemyBannerBlockEntity enemyBannerBlockEntity = (IEnemyBannerBlockEntity) bannerBlockEntity;
             enemyBannerBlockEntity.serverBannerBlockTick(level, pos, blockState, bannerBlockEntity);
         }
+    }
+
+    public static void renderEntity(EntityRenderDispatcher entityRenderDispatcher, LivingEntity entity, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+        AABB boundingBox = entity.getBoundingBox();
+        double width = boundingBox.getXsize();
+        double height = boundingBox.getYsize();
+
+        if(width > 0.6) {
+            width *= 1f/(width/0.6f);
+            height = boundingBox.getYsize()*(width/boundingBox.getXsize());
+        }
+        if(height > 2.0) {
+            width *= 1f/(height/2f);
+            height = boundingBox.getYsize()*(width/boundingBox.getXsize());
+        }
+        poseStack.translate(0.0, 1.2+(((1.3*height)/2.0)/2.0), 0.0);
+        poseStack.scale(0.6f, 0.6f, 0.02f);
+        poseStack.scale((float) (width/boundingBox.getXsize()), (float) (width/boundingBox.getXsize()), (float) (width/boundingBox.getXsize()));
+
+
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-30.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(225.0f));
+
+
+        entityRenderDispatcher.setRenderShadow(false);
+        entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, 0f, 0f, poseStack, bufferSource, packedLight);
+        entityRenderDispatcher.setRenderShadow(true);
     }
 }

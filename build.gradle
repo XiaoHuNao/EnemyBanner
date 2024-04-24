@@ -139,6 +139,9 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 dependencies {
@@ -148,6 +151,16 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+
+    //implementation Supplementaries
+//    compileOnly fg.deobf("curse.maven:supplementaries-412082:5225134")
+//    compileOnly fg.deobf("curse.maven:selene-499980:5254462")
+//    compileOnly fg.deobf("curse.maven:amendments-896746:5269334")
+//    runtimeOnly fg.deobf("curse.maven:supplementaries-412082:5225134")
+//    runtimeOnly fg.deobf("curse.maven:selene-499980:5254462")
+//    runtimeOnly fg.deobf("curse.maven:amendments-896746:5269334")
+
 
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
@@ -207,3 +220,18 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
+
+//tasks.named("runClient",JavaExec).configure {
+//    jvmArgs = ["-javaagent:\"C:\\Users\\shiwe\\.gradle\\caches\\modules-2\\files-2.1\\org.spongepowered\\mixin\\0.8.5\\9d1c0c3a304ae6697ecd477218fa61b850bf57fc\\mixin-0.8.5.jar\""]
+//}
+
+//afterEvaluate {
+//    configurations.runtimeClasspath.get().forEach {
+//        if (it.name.contains("sponge-mixin")) {
+//            tasks.named("runClient", JavaExec) {
+//                jvmArgs = ["-javaagent:${it.absolutePath}"]
+//            }
+//        }
+//    }
+//}
+

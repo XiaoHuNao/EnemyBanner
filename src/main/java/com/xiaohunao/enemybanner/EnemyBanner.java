@@ -17,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -49,6 +50,7 @@ import java.util.Objects;
 public class EnemyBanner {
     public static final String MOD_ID = "enemybanner";
     public static final LinkedHashMap<EntityType<?>, EntityBannerPattern> ENTITY_BANNER_PATTERNS = Maps.newLinkedHashMap();
+    public static final LinkedHashMap<EntityType<?>,LivingEntity> RENDER_ENTITY_CACHE = Maps.newLinkedHashMap();
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, EnemyBanner.MOD_ID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
     public static final DeferredRegister<BannerPattern> BANNER_PATTERNS = DeferredRegister.create(Registries.BANNER_PATTERN, MOD_ID);
@@ -104,7 +106,16 @@ public class EnemyBanner {
             .title(Component.translatable("tab.enemybanne.tab_title"))
             .icon(() -> BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()))
             .displayItems((parameters, output) -> {
-                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
+//                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
+                ForgeRegistries.ENTITY_TYPES.getEntries().stream()
+                        .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
+                        .forEach(entry -> {
+                            EntityType<?> entityType = entry.getValue();
+                            EntityBannerPattern entityBannerPattern = ENTITY_BANNER_PATTERNS.get(entityType);
+                            if (entityBannerPattern != null) {
+                                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), entityBannerPattern, BASIC_SILKS.get(), WHITE_SILKS.get()));
+                            }
+                        });
                 output.accept(BASIC.get());
                 output.accept(DAMAGE.get());
                 output.accept(INHIBIT.get());
@@ -143,6 +154,18 @@ public class EnemyBanner {
                             });
                 }
         );
+    }
+
+    public static LivingEntity createOrGetEntity(EntityType<?> entityType,ClientLevel clientLevel) {
+        LivingEntity livingEntity = RENDER_ENTITY_CACHE.get(entityType);
+        if (livingEntity == null) {
+            Entity entity = entityType.create(clientLevel);
+            if (entity instanceof LivingEntity) {
+                livingEntity = (LivingEntity) entity;
+                RENDER_ENTITY_CACHE.put(entityType, livingEntity);
+            }
+        }
+        return livingEntity;
     }
 
 

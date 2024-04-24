@@ -47,6 +47,7 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
     public void serverBannerBlockTick(Level level, BlockPos pos, BlockState blockState, BannerBlockEntity bannerBlockEntity){
         updateData(bannerBlockEntity);
         updateEntities();
+        pushORpull();
     }
 
     private void updateEntities() {
@@ -107,6 +108,30 @@ public abstract class BannerBlockEntityMixin extends BlockEntity implements IEne
             }
         });
     }
+
+    private void pushORpull(){
+        if (level != null) {
+            BlockPos blockPos = getBlockPos();
+            entities.forEach(entity -> {
+                double x = blockPos.getX() - entity.getX();
+                double z = blockPos.getZ() - entity.getZ();
+                double distance = Math.sqrt(x * x + z * z);
+                if (distance <= range) {
+                    if (distance > 1.5) {
+                        double repulseX = x / distance;
+                        double repulseZ = z / distance;
+                        if (pull){
+                            entity.setDeltaMovement(repulseX, 0, repulseZ);
+                        }
+                        if (push){
+                            entity.setDeltaMovement(-repulseX, 0, -repulseZ);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
 
 
     private List<?> getEntitiesInRange() {

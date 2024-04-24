@@ -32,6 +32,7 @@ public class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         add("item.enemybanner.enemy_banner", "Enemy Banner", "敌怪旗");
         add("tab.enemybanne.tab_title", "Enemy Banner", "敌怪旗");
+        add("tell.enemybanner.kill_entity", "%s has defeated the %s-th %s!", "%s 已经打败了 %s 个 %s");
         addBannerPattern("item.enemybanner.basic_silks", "Basic Silks", "基础丝绸");
         addBannerPattern("item.enemybanner.damage_silks", "Damage Silks", "伤害丝绸");
         addBannerPattern("item.enemybanner.inhibit_silks", "Inhibit Silks", "抑制丝绸");
