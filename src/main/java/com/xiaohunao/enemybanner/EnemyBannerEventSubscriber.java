@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -169,9 +170,11 @@ public class EnemyBannerEventSubscriber {
         Entity entity = event.getTarget();
         EntityType<?> type = entity.getType();
         ItemStack mainHandItem = player.getMainHandItem();
-        EntityBannerPattern entityBannerPattern = EnemyBanner.ENTITY_BANNER_PATTERNS.get(type);
-        ItemStack itemStack = BannerUtil.appendEntityPattern(mainHandItem, entityBannerPattern,EnemyBanner.BASIC_SILKS.get(),EnemyBanner.WHITE_SILKS.get());
-        player.setItemInHand(hand, itemStack);
+        if (mainHandItem.getItem() instanceof BannerItem) {
+            EntityBannerPattern entityBannerPattern = EnemyBanner.ENTITY_BANNER_PATTERNS.get(type);
+            ItemStack itemStack = BannerUtil.appendEntityPattern(mainHandItem, entityBannerPattern, EnemyBanner.BASIC_SILKS.get(), EnemyBanner.WHITE_SILKS.get());
+            player.setItemInHand(hand, itemStack);
+        }
     }
 
     @SubscribeEvent
