@@ -20,8 +20,8 @@ import java.util.List;
 
 @Mixin(BannerItem.class)
 public class BannerItemMixin extends StandingAndWallBlockItem {
-    public BannerItemMixin(Block p_248873_, Block p_251044_, Properties p_249308_, Direction p_250800_) {
-        super(p_248873_, p_251044_, p_249308_, p_250800_);
+    public BannerItemMixin(Block p_248873_, Block p_251044_, Properties p_249308_) {
+        super(p_248873_, p_251044_, p_249308_);
     }
 
     @Inject(method = "appendHoverTextFromBannerBlockEntityTag", at = @At(value = "HEAD"), cancellable = true)

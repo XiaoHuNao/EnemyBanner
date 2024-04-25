@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
@@ -47,7 +47,7 @@ public class BannerRendererMixin {
                 ci.cancel();
             }
 
-            if (BuiltInRegistries.BANNER_PATTERN.wrapAsHolder(bannerPattern).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY)){
+            if (Registry.BANNER_PATTERN.getHolderOrThrow(Registry.BANNER_PATTERN.getResourceKey(bannerPattern).orElseThrow()).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY)){
                 String hashName = bannerPattern.getHashname();
                 ResourceLocation resource = EnemyBanner.asResource("textures/entity/banner/" + hashName + ".png");
                 VertexConsumer basicFlagVertexconsumer = bufferSource.getBuffer(RenderType.entitySolid(resource));
@@ -55,7 +55,7 @@ public class BannerRendererMixin {
                 ci.cancel();
             }
 
-            if (BuiltInRegistries.BANNER_PATTERN.wrapAsHolder(bannerPattern).is(EnemyBanner.COLOR_SILKS_TAG_KEY)){
+            if (Registry.BANNER_PATTERN.getHolderOrThrow(Registry.BANNER_PATTERN.getResourceKey(bannerPattern).orElseThrow()).is(EnemyBanner.COLOR_SILKS_TAG_KEY)){
                 String hashName = bannerPattern.getHashname();
                 ResourceLocation bar = EnemyBanner.asResource("textures/entity/banner/" + hashName + ".png");
                 VertexConsumer barVertexConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(bar));

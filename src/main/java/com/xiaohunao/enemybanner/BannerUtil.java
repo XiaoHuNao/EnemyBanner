@@ -1,13 +1,13 @@
 package com.xiaohunao.enemybanner;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import com.xiaohunao.enemybanner.mixed.IEnemyBannerBlockEntity;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -144,11 +144,11 @@ public class BannerUtil {
     public static void replacePattern(ListTag tag, BannerPattern pattern) {
         for (Tag tag1 : tag) {
             CompoundTag compoundTag = (CompoundTag)tag1;
-            if (BannerPattern.byHash(compoundTag.getString("Pattern")).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY) && BuiltInRegistries.BANNER_PATTERN.wrapAsHolder(pattern).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY)) {
+            if (BannerPattern.byHash(compoundTag.getString("Pattern")).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY) && Registry.BANNER_PATTERN.getHolderOrThrow(Registry.BANNER_PATTERN.getResourceKey(pattern).orElseThrow()).is(EnemyBanner.FUNCTION_SILKS_TAG_KEY)) {
                 compoundTag.putString("Pattern", pattern.getHashname());
                 return;
             }
-            if(BannerPattern.byHash(compoundTag.getString("Pattern")).is(EnemyBanner.COLOR_SILKS_TAG_KEY) && BuiltInRegistries.BANNER_PATTERN.wrapAsHolder(pattern).is(EnemyBanner.COLOR_SILKS_TAG_KEY)) {
+            if(BannerPattern.byHash(compoundTag.getString("Pattern")).is(EnemyBanner.COLOR_SILKS_TAG_KEY) && Registry.BANNER_PATTERN.getHolderOrThrow(Registry.BANNER_PATTERN.getResourceKey(pattern).orElseThrow()).is(EnemyBanner.COLOR_SILKS_TAG_KEY)) {
                 compoundTag.putString("Pattern", pattern.getHashname());
                 return;
             }
@@ -179,9 +179,9 @@ public class BannerUtil {
         poseStack.scale((float) (width/boundingBox.getXsize()), (float) (width/boundingBox.getXsize()), (float) (width/boundingBox.getXsize()));
 
 
-        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0f));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-30.0f));
-        poseStack.mulPose(Axis.YP.rotationDegrees(225.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-30.0f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(225.0f));
 
 
         entityRenderDispatcher.setRenderShadow(false);

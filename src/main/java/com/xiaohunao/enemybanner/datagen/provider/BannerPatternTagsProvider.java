@@ -1,23 +1,23 @@
 package com.xiaohunao.enemybanner.datagen.provider;
 
 import com.xiaohunao.enemybanner.EnemyBanner;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraftforge.common.data.ExistingFileHelper;
 
 
-import java.util.concurrent.CompletableFuture;
+
 
 public class BannerPatternTagsProvider extends TagsProvider<BannerPattern> {
-    public BannerPatternTagsProvider(PackOutput p_256596_, ResourceKey<? extends Registry<BannerPattern>> p_255886_, CompletableFuture<HolderLookup.Provider> p_256513_) {
-        super(p_256596_, p_255886_, p_256513_);
+    public BannerPatternTagsProvider(DataGenerator p_126546_, Registry<BannerPattern> p_126547_, ExistingFileHelper existingFileHelper) {
+        super(p_126546_, p_126547_, EnemyBanner.MOD_ID, existingFileHelper);
     }
 
+
     @Override
-    protected void addTags(HolderLookup.Provider provider) {
+    protected void addTags() {
         this.tag(EnemyBanner.COLOR_SILKS_TAG_KEY)
                 .add(EnemyBanner.WHITE_SILKS.getKey(),
                         EnemyBanner.ORANGE_SILKS.getKey(),
@@ -98,5 +98,4 @@ public class BannerPatternTagsProvider extends TagsProvider<BannerPattern> {
                 .add(EnemyBanner.BLACK_SILKS.getKey());
 
     }
-
 }

@@ -1,19 +1,9 @@
 package com.xiaohunao.enemybanner;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
-import com.xiaohunao.enemybanner.mixin.BannerBlockEntityMixin;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.DefaultedRegistry;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -22,11 +12,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -39,12 +25,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
 
 @Mod(EnemyBanner.MOD_ID)
 public class EnemyBanner {
@@ -52,35 +35,48 @@ public class EnemyBanner {
     public static final LinkedHashMap<EntityType<?>, EntityBannerPattern> ENTITY_BANNER_PATTERNS = Maps.newLinkedHashMap();
     public static final LinkedHashMap<EntityType<?>,LivingEntity> RENDER_ENTITY_CACHE = Maps.newLinkedHashMap();
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, EnemyBanner.MOD_ID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
-    public static final DeferredRegister<BannerPattern> BANNER_PATTERNS = DeferredRegister.create(Registries.BANNER_PATTERN, MOD_ID);
+    public static final DeferredRegister<BannerPattern> BANNER_PATTERNS = DeferredRegister.create(Registry.BANNER_PATTERN_REGISTRY, MOD_ID);
     public static final TagKey<BannerPattern> FUNCTION_SILKS_TAG_KEY = createBannerPatternTagKey("function_silks");
     public static final TagKey<BannerPattern> COLOR_SILKS_TAG_KEY = createBannerPatternTagKey("color_silks");
 
+    public static final CreativeModeTab CREATIVE_TABS = new CreativeModeTab("enemybanner_tab") {
+        @Override
+        @NotNull
+        public ItemStack makeIcon() {
+            return BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get());
+        }
+
+        @Override
+        public void fillItemList(NonNullList<ItemStack> p_40778_) {
+            super.fillItemList(p_40778_);
+            p_40778_.add(0,BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
+        }
+    };
+
     public static final RegistryObject<BannerPattern> BASIC_SILKS = BANNER_PATTERNS.register("basic_silks", () -> new BannerPattern("basic_silks"));
     public static final RegistryObject<BannerPatternItem> BASIC = ITEMS.register("basic_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("basic_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("basic_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> DAMAGE_SILKS = BANNER_PATTERNS.register("damage_silks", () -> new BannerPattern("damage_silks"));
     public static final RegistryObject<BannerPatternItem> DAMAGE = ITEMS.register("damage_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("damage_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("damage_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> INHIBIT_SILKS = BANNER_PATTERNS.register("inhibit_silks", () -> new BannerPattern("inhibit_silks"));
     public static final RegistryObject<BannerPatternItem> INHIBIT = ITEMS.register("inhibit_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("inhibit_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("inhibit_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> LOOT_SILKS = BANNER_PATTERNS.register("loot_silks", () -> new BannerPattern("loot_silks"));
     public static final RegistryObject<BannerPatternItem> LOOT = ITEMS.register("loot_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("loot_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("loot_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> PULL_SILKS = BANNER_PATTERNS.register("pull_silks", () -> new BannerPattern("pull_silks"));
     public static final RegistryObject<BannerPatternItem> PULL = ITEMS.register("pull_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("pull_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("pull_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> PUSH_SILKS = BANNER_PATTERNS.register("push_silks", () -> new BannerPattern("push_silks"));
     public static final RegistryObject<BannerPatternItem> PUSH = ITEMS.register("push_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("push_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("push_silks"),getProperties(1)));
     public static final RegistryObject<BannerPattern> RANGE_SILKS = BANNER_PATTERNS.register("range_silks", () -> new BannerPattern("range_silks"));
     public static final RegistryObject<BannerPatternItem> RANGE = ITEMS.register("range_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("range_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("range_silks"), getProperties(1)));
     public static final RegistryObject<BannerPattern> RESIST_SILKS = BANNER_PATTERNS.register("resist_silks", () -> new BannerPattern("resist_silks"));
     public static final RegistryObject<BannerPatternItem> RESIST = ITEMS.register("resist_silks",
-            () -> new BannerPatternItem(createBannerPatternTagKey("resist_silks"), new Item.Properties().stacksTo(1)));
+            () -> new BannerPatternItem(createBannerPatternTagKey("resist_silks"), getProperties(1)));
 
     //16色的bannerSilks
     //white
@@ -102,37 +98,16 @@ public class EnemyBanner {
     public static final RegistryObject<BannerPattern> BLACK_SILKS = BANNER_PATTERNS.register("black_silks", () -> new BannerPattern("black_silks"));
 
 
-    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("enemy_banner_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("tab.enemybanne.tab_title"))
-            .icon(() -> BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()))
-            .displayItems((parameters, output) -> {
-//                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
-                ForgeRegistries.ENTITY_TYPES.getEntries().stream()
-                        .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
-                        .forEach(entry -> {
-                            EntityType<?> entityType = entry.getValue();
-                            EntityBannerPattern entityBannerPattern = ENTITY_BANNER_PATTERNS.get(entityType);
-                            if (entityBannerPattern != null) {
-                                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), entityBannerPattern, BASIC_SILKS.get(), WHITE_SILKS.get()));
-                            }
-                        });
-                output.accept(BASIC.get());
-                output.accept(DAMAGE.get());
-                output.accept(INHIBIT.get());
-                output.accept(LOOT.get());
-                output.accept(PULL.get());
-                output.accept(PUSH.get());
-                output.accept(RANGE.get());
-                output.accept(RESIST.get());
-            }).build());
+    @NotNull
+    private static Item.Properties getProperties(int stacksTo) {
+        return new Item.Properties().stacksTo(stacksTo).tab(CREATIVE_TABS);
+    }
 
     public EnemyBanner() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::register);
         modEventBus.addListener(this::onFMLCommonSetup);
-
+        modEventBus.addListener(this::register);
         ITEMS.register(modEventBus);
-        CREATIVE_TABS.register(modEventBus);
         BANNER_PATTERNS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -141,7 +116,7 @@ public class EnemyBanner {
 
     @SubscribeEvent
     public void register(RegisterEvent event) {
-        event.register(Registries.BANNER_PATTERN,
+        event.register(Registry.BANNER_PATTERN.key(),
                 helper -> {
                     ForgeRegistries.ENTITY_TYPES.getEntries().stream()
                             .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
@@ -156,7 +131,7 @@ public class EnemyBanner {
         );
     }
 
-    public static LivingEntity createOrGetEntity(EntityType<?> entityType,ClientLevel clientLevel) {
+    public static LivingEntity createOrGetEntity(EntityType<?> entityType, ClientLevel clientLevel) {
         LivingEntity livingEntity = RENDER_ENTITY_CACHE.get(entityType);
         if (livingEntity == null) {
             Entity entity = entityType.create(clientLevel);
@@ -175,7 +150,7 @@ public class EnemyBanner {
     }
 
     public static TagKey<BannerPattern> createBannerPatternTagKey(String key) {
-        return TagKey.create(Registries.BANNER_PATTERN, asResource(key));
+        return TagKey.create(Registry.BANNER_PATTERN.key(), asResource(key));
     }
     @SubscribeEvent
     public void onFMLCommonSetup(FMLCommonSetupEvent event) {

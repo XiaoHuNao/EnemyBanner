@@ -48,7 +48,7 @@ public class EnemyBannerEventSubscriber {
             return;
         }
 
-        if(livingEntity.level().isClientSide()) {
+        if(livingEntity.level.isClientSide()) {
             return;
         }
 
@@ -86,7 +86,7 @@ public class EnemyBannerEventSubscriber {
         DamageSource source = event.getSource();
         Entity sourceEntity = source.getEntity();
         float amount = event.getAmount();
-        Level level = livingEntity.level();
+        Level level = livingEntity.level;
         if (level.isClientSide()) {
             return;
         }
@@ -105,7 +105,7 @@ public class EnemyBannerEventSubscriber {
         DamageSource source = event.getSource();
         Entity sourceEntity = source.getEntity();
         float amount = event.getAmount();
-        Level level = livingEntity.level();
+        Level level = livingEntity.level;
         if (level.isClientSide()) {
             return;
         }
@@ -123,7 +123,7 @@ public class EnemyBannerEventSubscriber {
     public static void looting(LootingLevelEvent event) {
         int lootingLevel = event.getLootingLevel();
         LivingEntity livingEntity = event.getEntity();
-        Level level = livingEntity.level();
+        Level level = livingEntity.level;
         if (level.isClientSide()) {
             return;
         }
@@ -139,7 +139,7 @@ public class EnemyBannerEventSubscriber {
     @SubscribeEvent
     public static void inhibitory(EntityTeleportEvent.EnderEntity event) {
         LivingEntity entityLiving = event.getEntityLiving();
-        Level level = entityLiving.level();
+        Level level = entityLiving.level;
         if (level.isClientSide()) {
             return;
         }
@@ -154,7 +154,7 @@ public class EnemyBannerEventSubscriber {
         CompoundTag persistentData = entity.getPersistentData();
         if (persistentData.contains("BannerPos")) {
             BlockPos blockPos = BlockPos.of(persistentData.getLong("BannerPos"));
-            if (entity.level().getBlockEntity(blockPos) instanceof IEnemyBannerBlockEntity blockEntity) return LazyOptional.of(() -> blockEntity);
+            if (entity.level.getBlockEntity(blockPos) instanceof IEnemyBannerBlockEntity blockEntity) return LazyOptional.of(() -> blockEntity);
         }
         return LazyOptional.empty();
     }

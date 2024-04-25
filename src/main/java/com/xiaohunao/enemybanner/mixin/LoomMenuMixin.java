@@ -3,14 +3,10 @@ package com.xiaohunao.enemybanner.mixin;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.xiaohunao.enemybanner.BannerUtil;
-import com.xiaohunao.enemybanner.EnemyBanner;
-import com.xiaohunao.enemybanner.EntityBannerPattern;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.tags.BannerPatternTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
@@ -59,7 +55,7 @@ public abstract class LoomMenuMixin extends AbstractContainerMenu {
                 list1.add(BannerPattern.byHash(BannerUtil.getDyeSilkPattern(dyeItem).getHashname()));
             }
             if (!patternStack.isEmpty() && patternStack.getItem() instanceof BannerPatternItem bannerPatternItem){
-                list1.addAll(BuiltInRegistries.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of()));
+                list1.addAll(Registry.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of()));
             }
             this.selectablePatterns = list1;
 
@@ -118,7 +114,7 @@ public abstract class LoomMenuMixin extends AbstractContainerMenu {
         ItemStack itemstack1 = this.dyeSlot.getItem();
         ItemStack itemstack2 = ItemStack.EMPTY;
         if (BannerUtil.hasEntityPattern(itemstack)) {
-            itemstack2 = itemstack.copyWithCount(1);
+            itemstack2 = itemstack.copy();
             CompoundTag compoundtag = BlockItem.getBlockEntityData(itemstack2);
             ListTag listtag;
             if (compoundtag != null && compoundtag.contains("Patterns", 9)) {

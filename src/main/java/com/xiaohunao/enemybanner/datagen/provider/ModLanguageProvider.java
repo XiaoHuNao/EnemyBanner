@@ -3,35 +3,34 @@ package com.xiaohunao.enemybanner.datagen.provider;
 import com.google.gson.JsonObject;
 import com.xiaohunao.enemybanner.EnemyBanner;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.data.LanguageProvider;
-import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class ModLanguageProvider extends LanguageProvider {
     private final Map<String, String> enData = new TreeMap<>();
     private final Map<String, String> cnData = new TreeMap<>();
-    private final PackOutput output;
     private final String locale;
+    private DataGenerator gen;
 
-
-    public ModLanguageProvider(PackOutput output, String locale) {
-        super(output, EnemyBanner.MOD_ID, locale);
-        this.output = output;
+    public ModLanguageProvider(DataGenerator gen, String locale) {
+        super(gen, EnemyBanner.MOD_ID, locale);
         this.locale = locale;
+        this.gen = gen;
     }
+
 
     @Override
     protected void addTranslations() {
         add("item.enemybanner.enemy_banner", "Enemy Banner", "敌怪旗");
-        add("tab.enemybanne.tab_title", "Enemy Banner", "敌怪旗");
+        add("itemGroup.enemybanner_tab", "Enemy Banner", "敌怪旗");
         add("tell.enemybanner.kill_entity", "%s has defeated the %s-th %s!", "%s 已经打败了 %s 个 %s");
         addBannerPattern("item.enemybanner.basic_silks", "Basic Silks", "基础丝绸");
         addBannerPattern("item.enemybanner.damage_silks", "Damage Silks", "伤害丝绸");
@@ -44,25 +43,27 @@ public class ModLanguageProvider extends LanguageProvider {
     }
 
     @Override
-    public @NotNull CompletableFuture<?> run(CachedOutput cache) {
+    public void run(CachedOutput cache) {
         this.addTranslations();
-        Path path = this.output.getOutputFolder(PackOutput.Target.RESOURCE_PACK)
+        Path path = this.gen.getOutputFolder(DataGenerator.Target.RESOURCE_PACK)
                 .resolve(EnemyBanner.MOD_ID).resolve("lang");
         if (this.locale.equals("en_us") && !this.enData.isEmpty()) {
-            return this.save(this.enData, cache, path.resolve("en_us.json"));
+            this.save(this.enData, cache, path.resolve("en_us.json"));
         }
 
         if (this.locale.equals("zh_cn") && !this.cnData.isEmpty()) {
-            return this.save(this.cnData, cache, path.resolve("zh_cn.json"));
+            this.save(this.cnData, cache, path.resolve("zh_cn.json"));
         }
-
-        return CompletableFuture.allOf();
     }
 
-    private CompletableFuture<?> save(Map<String, String> data, CachedOutput cache, Path target) {
+    private void save(Map<String, String> data, CachedOutput cache, Path target){
         JsonObject json = new JsonObject();
         data.forEach(json::addProperty);
-        return DataProvider.saveStable(cache, json, target);
+        try {
+            DataProvider.saveStable(cache, json, target);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
