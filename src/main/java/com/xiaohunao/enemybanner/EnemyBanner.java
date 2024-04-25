@@ -102,20 +102,20 @@ public class EnemyBanner {
     public static final RegistryObject<BannerPattern> BLACK_SILKS = BANNER_PATTERNS.register("black_silks", () -> new BannerPattern("black_silks"));
 
 
-    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("enemy_banner_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("tab.enemybanne.tab_title"))
+    public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_TABS.register("enemybanner_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.enemybanner_tab"))
             .icon(() -> BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()))
             .displayItems((parameters, output) -> {
-//                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
-                ForgeRegistries.ENTITY_TYPES.getEntries().stream()
-                        .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
-                        .forEach(entry -> {
-                            EntityType<?> entityType = entry.getValue();
-                            EntityBannerPattern entityBannerPattern = ENTITY_BANNER_PATTERNS.get(entityType);
-                            if (entityBannerPattern != null) {
-                                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), entityBannerPattern, BASIC_SILKS.get(), WHITE_SILKS.get()));
-                            }
-                        });
+                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), ENTITY_BANNER_PATTERNS.get(EntityType.ZOMBIE), BASIC_SILKS.get(), WHITE_SILKS.get()));
+//                ForgeRegistries.ENTITY_TYPES.getEntries().stream()
+//                        .filter(entry -> entry.getValue().getCategory() != MobCategory.MISC)
+//                        .forEach(entry -> {
+//                            EntityType<?> entityType = entry.getValue();
+//                            EntityBannerPattern entityBannerPattern = ENTITY_BANNER_PATTERNS.get(entityType);
+//                            if (entityBannerPattern != null) {
+//                                output.accept(BannerUtil.appendEntityPattern(Items.WHITE_BANNER.getDefaultInstance(), entityBannerPattern, BASIC_SILKS.get(), WHITE_SILKS.get()));
+//                            }
+//                        });
                 output.accept(BASIC.get());
                 output.accept(DAMAGE.get());
                 output.accept(INHIBIT.get());
