@@ -1,6 +1,5 @@
 package com.xiaohunao.enemybanner;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraftforge.common.ForgeConfigSpec;
 

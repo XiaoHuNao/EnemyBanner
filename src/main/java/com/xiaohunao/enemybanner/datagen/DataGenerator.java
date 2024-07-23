@@ -1,20 +1,16 @@
 package com.xiaohunao.enemybanner.datagen;
 
-import com.google.common.collect.Sets;
 import com.xiaohunao.enemybanner.EnemyBanner;
 import com.xiaohunao.enemybanner.datagen.provider.BannerPatternTagsProvider;
 import com.xiaohunao.enemybanner.datagen.provider.ModLanguageProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = EnemyBanner.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)

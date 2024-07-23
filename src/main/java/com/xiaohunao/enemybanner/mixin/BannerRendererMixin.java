@@ -36,7 +36,7 @@ public class BannerRendererMixin {
             Minecraft minecraft = Minecraft.getInstance();
             if(bannerPattern instanceof EntityBannerPattern entityPattern){
                 if (minecraft.level != null){
-                    LivingEntity livingEntity = EnemyBanner.createOrGetEntity(entityPattern.entityType, minecraft.level);
+                    LivingEntity livingEntity = BannerUtil.createOrGetEntity(entityPattern.entityType, minecraft.level);
                     EntityRenderDispatcher entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
                     poseStack.pushPose();
                     modelPart.translateAndRotate(poseStack);

@@ -2,8 +2,6 @@ package com.xiaohunao.enemybanner.mixin;
 
 import com.xiaohunao.enemybanner.BannerUtil;
 import com.xiaohunao.enemybanner.EnemyBanner;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;

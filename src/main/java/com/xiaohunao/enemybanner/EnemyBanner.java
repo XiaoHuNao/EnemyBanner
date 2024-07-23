@@ -1,32 +1,18 @@
 package com.xiaohunao.enemybanner;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
-import com.xiaohunao.enemybanner.mixin.BannerBlockEntityMixin;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.DefaultedRegistry;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.item.BannerPatternItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BannerPattern;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -39,12 +25,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
 
 @Mod(EnemyBanner.MOD_ID)
 public class EnemyBanner {
@@ -156,17 +138,7 @@ public class EnemyBanner {
         );
     }
 
-    public static LivingEntity createOrGetEntity(EntityType<?> entityType,ClientLevel clientLevel) {
-        LivingEntity livingEntity = RENDER_ENTITY_CACHE.get(entityType);
-        if (livingEntity == null) {
-            Entity entity = entityType.create(clientLevel);
-            if (entity instanceof LivingEntity) {
-                livingEntity = (LivingEntity) entity;
-                RENDER_ENTITY_CACHE.put(entityType, livingEntity);
-            }
-        }
-        return livingEntity;
-    }
+
 
 
 

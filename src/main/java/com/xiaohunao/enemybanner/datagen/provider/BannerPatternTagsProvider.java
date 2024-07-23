@@ -8,7 +8,6 @@ import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.entity.BannerPattern;
 
-
 import java.util.concurrent.CompletableFuture;
 
 public class BannerPatternTagsProvider extends TagsProvider<BannerPattern> {
