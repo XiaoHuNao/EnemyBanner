@@ -4,7 +4,6 @@ import com.xiaohunao.enemybanner.BannerUtil;
 import com.xiaohunao.enemybanner.EnemyBanner;
 import com.xiaohunao.enemybanner.EntityBannerPattern;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BannerItem;

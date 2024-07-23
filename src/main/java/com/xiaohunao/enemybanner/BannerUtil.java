@@ -3,6 +3,7 @@ package com.xiaohunao.enemybanner;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.xiaohunao.enemybanner.mixed.IEnemyBannerBlockEntity;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
@@ -187,5 +189,17 @@ public class BannerUtil {
         entityRenderDispatcher.setRenderShadow(false);
         entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, 0f, 0f, poseStack, bufferSource, packedLight);
         entityRenderDispatcher.setRenderShadow(true);
+    }
+
+    public static LivingEntity createOrGetEntity(EntityType<?> entityType, ClientLevel clientLevel) {
+        LivingEntity livingEntity = EnemyBanner.RENDER_ENTITY_CACHE.get(entityType);
+        if (livingEntity == null) {
+            Entity entity = entityType.create(clientLevel);
+            if (entity instanceof LivingEntity) {
+                livingEntity = (LivingEntity) entity;
+                EnemyBanner.RENDER_ENTITY_CACHE.put(entityType, livingEntity);
+            }
+        }
+        return livingEntity;
     }
 }
