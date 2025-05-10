@@ -2,8 +2,8 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.xiaohunao.enemybanner.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "refmap": "enemybanner.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "terra_moment.refmap.json",
   "mixins": [
   ],
   "client": [

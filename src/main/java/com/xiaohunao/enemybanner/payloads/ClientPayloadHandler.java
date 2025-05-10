@@ -1,0 +1,16 @@
+package com.xiaohunao.enemybanner.payloads;
+
+import com.xiaohunao.enemybanner.AttachmentType.AttachmentTypeRegister;
+import com.mojang.logging.LogUtils;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+
+public class ClientPayloadHandler{
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static void handle(@NotNull PlayerBannerDataPayload data, @NotNull IPayloadContext context){
+        //接受服务端数据，在客户端处理
+        context.player().setData(AttachmentTypeRegister.PLAYER_BANNER_DATA.get(), data.playerBannerDataMap());
+    }
+}
