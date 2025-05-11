@@ -10,7 +10,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.Map;
 
-@EventBusSubscriber(modid = EnemyBanner.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber(modid = EnemyBanner.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.DEDICATED_SERVER)
 public class ServerEventHandler {
 
 //    @SubscribeEvent
