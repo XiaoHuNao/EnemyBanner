@@ -1,6 +1,5 @@
-package com.xiaohunao.enemybanner.AttachmentType;
+package com.xiaohunao.enemybanner;
 
-import com.xiaohunao.enemybanner.EnemyBanner;
 import com.mojang.serialization.Codec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -15,10 +14,11 @@ import java.util.function.Supplier;
 public class AttachmentTypeRegister {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, EnemyBanner.MODID);
 
-    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Map<String, PlayerBannerData>>> PLAYER_BANNER_DATA = ATTACHMENT_TYPES.register(
-            "player_banner_data",
-            () -> AttachmentType.builder((Supplier<Map<String, PlayerBannerData>>) HashMap::new).serialize(Codec.unboundedMap(Codec.STRING, PlayerBannerData.CODEC)).copyOnDeath().build()
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<Map<String, Integer>>> PLAYER_BANNER_COUNT = ATTACHMENT_TYPES.register(
+            "player_banner_count",
+            () -> AttachmentType.builder((Supplier<Map<String, Integer>>) HashMap::new).serialize(Codec.unboundedMap(Codec.STRING, Codec.INT)).copyOnDeath().build()
     );
+
     public static void register(IEventBus bus){
         ATTACHMENT_TYPES.register(bus);
     }

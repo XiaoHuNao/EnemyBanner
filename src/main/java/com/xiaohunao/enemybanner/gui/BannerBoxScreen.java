@@ -1,6 +1,5 @@
 package com.xiaohunao.enemybanner.gui;
 
-import com.xiaohunao.enemybanner.AttachmentType.PlayerBannerData;
 import com.xiaohunao.enemybanner.BannerConfig;
 import com.xiaohunao.enemybanner.BannerParameters;
 import com.xiaohunao.enemybanner.EnemyBanner;
@@ -8,8 +7,7 @@ import com.xiaohunao.enemybanner.gui.widget.BannerCheckBox;
 import com.xiaohunao.enemybanner.gui.widget.ListWidget;
 import com.xiaohunao.enemybanner.gui.widget.ScrollBar;
 import com.xiaohunao.enemybanner.gui.widget.ScrollWidget;
-import com.xiaohunao.enemybanner.items.ItemRegister;
-import com.xiaohunao.enemybanner.payloads.PlayerBannerDataPayload;
+import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -18,8 +16,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -34,26 +30,24 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
     private ListWidget listWidget;
     private ScrollBar scrollBar;
     private Map<String, BannerCheckBox> bannerCheckBoxMap;
+    private Map<String, Integer> bannerCount;
 
     private boolean hasBannerInput;
-    private String silksId;
 
     private RadioBoxManager radioBoxManager;
-
-    private Map<String, PlayerBannerData> playerBannerData;
 
     public BannerBoxScreen(BannerBoxMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, ResourceLocation.fromNamespaceAndPath(EnemyBanner.MODID, "banner_box_menu"));
         titleLabelX = 10;
         inventoryLabelX = 10;
-        this.playerBannerData = menu.getPlayerBannerData();
+        this.bannerCount = menu.getPlayerBannerCount();
         this.radioBoxManager = new RadioBoxManager();
         this.bannerCheckBoxMap = new HashMap<>();
     }
 
     @Override
     protected void subInit() {
-        this.playerBannerData = menu.getPlayerBannerData();
+        this.bannerCount = menu.getPlayerBannerCount();
         bannerScroll = new ScrollWidget(leftPos + 32, topPos + 17, 112, 44, Component.nullToEmpty("Monster"));
         bannerScroll.setOrientation(LinearLayout.Orientation.HORIZONTAL);
         bannerScroll.setScrollRate(15);
@@ -63,11 +57,9 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
         bannerScroll.setChild(listWidget);
 
         addWidget(bannerScroll);
-        for (String key : playerBannerData.keySet()){
-            if (BannerConfig.contains(key) && playerBannerData.get(key).getCanUsedCount() != 0){
-                BannerParameters bannerParameters = new BannerParameters(key);
-                addNewBannerCheckBox(bannerParameters);
-            }
+        for (String key : bannerCount.keySet()){
+            if (BannerConfig.contains(key) && bannerCount.get(key) >= Objects.requireNonNull(BannerConfig.getBanner(key)).basicKills)
+                addNewBannerCheckBox(new BannerParameters(key));
         }
 
         scrollBar = new ScrollBar.Builder(leftPos + 32, topPos + 64, 112, 6, bannerScroll, BACKGROUND_LOCATION)
@@ -81,24 +73,19 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
     }
 
     @Override
-    public void slotChanged(@NotNull AbstractContainerMenu containerToSend, int slotInd, @NotNull ItemStack stack) {
-        super.slotChanged(containerToSend, slotInd, stack);
-        playerBannerData = getMenu().getPlayerBannerData();
-        silksId = (menu.getSlot(1).hasItem() ? menu.getSlot(1).getItem().getItem().toString() : ItemRegister.BASIC_SILKS.getRegisteredName()).split(":")[1];
+    protected void containerTick() {
+        super.containerTick();
         hasBannerInput = getMenu().getSlot(0).getItem().is(ItemTags.BANNERS);
-
         for (BannerCheckBox checkBox : bannerCheckBoxMap.values()) {
-            checkBox.getParameters().setSilksId(silksId);
-            checkBox.setBannerCount(playerBannerData.get(checkBox.getParameters().getMonsterId()).getCanUsedCount());
-        }
-
-        if (radioBoxManager.getSelected() != null){
-            sendData(radioBoxManager.getSelected().getParameters());
+            checkBox.getParameters().setSilksId(menu.getSilksId());
+            bannerCount = menu.getPlayerBannerCount();
+            int count = bannerCount.get(checkBox.getParameters().getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(checkBox.getParameters().getMonsterId())).basicKills;
+            checkBox.setBannerCount(count);
         }
     }
 
-    private void sendData(BannerParameters parameters){
-        PacketDistributor.sendToServer(new PlayerBannerDataPayload(playerBannerData, parameters.getMonsterId(), parameters.getSilksId()));
+    private void sendData(String key){
+        PacketDistributor.sendToServer(new PlayerBannerCountPayload(bannerCount, key));
     }
 
     @Override
@@ -113,7 +100,7 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
 
     private void addNewBannerCheckBox(BannerParameters parameters){
         BannerCheckBox bannerCheckBox = new BannerCheckBox(parameters.getMonsterId(), parameters, 22, 42, Component.empty());
-        bannerCheckBox.setBannerCount(playerBannerData.get(parameters.getMonsterId()).getCanUsedCount());
+        bannerCheckBox.setBannerCount(bannerCount.get(parameters.getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(parameters.getMonsterId())).basicKills);
         listWidget.add(bannerCheckBox);
         bannerCheckBoxMap.put(parameters.getMonsterId(), bannerCheckBox);
     }
@@ -143,10 +130,10 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
         }
 
         private void init(){
-            if (!checkBoxList.isEmpty())
-                checkBoxList.getFirst().setSelected(true);
             for (BannerCheckBox checkBox : checkBoxList)
                 setCheckBoxListener(checkBox);
+            if (!checkBoxList.isEmpty())
+                checkBoxList.getFirst().setSelected(true);
         }
 
         public void setCheckBoxList(List<BannerCheckBox> list){
@@ -160,15 +147,15 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
 
         private void onSelected(BannerCheckBox selected){
             this.selected = selected;
-            getMenu().setSelected(selected.getParameters());
-            sendData(selected.getParameters());
+            getMenu().setSelected(selected.getParameters().getMonsterId());
+            sendData(selected.getParameters().getMonsterId());
         }
 
         private void setCheckBoxListener(BannerCheckBox checkBox){
-            checkBox.addClickListener((banner) -> {
-                if (banner.isSelected()){
+            checkBox.addClickListener((box) -> {
+                if (box.isSelected()){
                     for (BannerCheckBox bannerCheckBox : checkBoxList) {
-                        if (!Objects.equals(bannerCheckBox.getId(), banner.getId()))
+                        if (!Objects.equals(bannerCheckBox.getId(), box.getId()))
                             bannerCheckBox.setSelected(false);
                     }
                     onSelected(checkBox);

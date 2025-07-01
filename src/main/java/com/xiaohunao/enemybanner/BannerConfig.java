@@ -1,7 +1,6 @@
 package com.xiaohunao.enemybanner;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,32 +18,20 @@ public class BannerConfig {
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final List<Banner> BANNERS;
-    private static final List<String> DEFAULT_MONSTER_IDS = new ArrayList<>();
-
     public static final int DEFAULT_BASIC_KILLS = 50;
-
-    static {
-        BANNERS = new ArrayList<>();
-
-        BuiltInRegistries.ENTITY_TYPE.stream().forEach(entityType -> {
-            if (entityType.getCategory().equals(MobCategory.MONSTER)) {
-                BANNERS.add(new Banner(EntityType.getKey(entityType).toString(), DEFAULT_BASIC_KILLS));
-            }
-        });
-
-        for (Banner banner : BANNERS){
-            DEFAULT_MONSTER_IDS.add(banner.monsterId);
-        }
-    }
 
     private static final ModConfigSpec.IntValue BASIC_KILLS = BUILDER
             .comment("每兑换一个旗帜所需要的击杀数")
             .defineInRange("basicKills", DEFAULT_BASIC_KILLS, 1, Integer.MAX_VALUE);
 
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> MONSTER_IDS = BUILDER
-            .comment("能够兑换的怪物种类")
-            .defineList("monsterIds", DEFAULT_MONSTER_IDS, String::new, Objects::nonNull);
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> MONSTER_IDS_ADDED = BUILDER
+            .defineListAllowEmpty("monsterIds.added", new ArrayList<>(), String::new, Objects::nonNull);
+
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> MONSTER_IDS_EXCLUDED = BUILDER
+            .defineListAllowEmpty("monsterIds.excluded", new ArrayList<>(), String::new, Objects::nonNull);
+
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> MONSTER_IDS_ONLY = BUILDER
+            .defineListAllowEmpty("monsterIds.only", new ArrayList<>(), String::new, Objects::nonNull);
 
     private static final ModConfigSpec.ConfigValue<List<? extends String>> SPECIAL_BASIC_KILLS = BUILDER
             .comment("特定怪物兑换一个旗帜所需的击杀数")
@@ -54,37 +41,39 @@ public class BannerConfig {
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     public static int basicKills;
-    public static Map<EntityType<?>, Banner> banners;
+    public static List<? extends String> addedList;
+    public static List<? extends String> excludedList;
+    public static List<? extends String> onlyList;
+    public static Map<String, Integer> specialBasicKills;
 
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent event){
-        List<? extends String> specialBasicKillsList = SPECIAL_BASIC_KILLS.get();
         basicKills = BASIC_KILLS.get();
-        banners = new HashMap<>();
-        Map<String, Integer> specialBasicKillsMap = new HashMap<>();
-
-        for (String specialBasicKills : specialBasicKillsList) {
-            String[] split = specialBasicKills.split("=");
-            specialBasicKillsMap.put(split[0].trim(), Integer.decode(split[1].trim()));
-        }
-
-        for(String id : MONSTER_IDS.get()){
-            Optional<EntityType<?>> entityType = EntityType.byString(id);
-            int bannerBasicKills = basicKills;
-            if(entityType.isPresent()){
-                if(specialBasicKillsMap.containsKey(id) && specialBasicKillsMap.get(id) > 0)
-                    bannerBasicKills = specialBasicKillsMap.get(id);
-                banners.put(entityType.get(), new Banner(id, bannerBasicKills));
-                LOGGER.debug("add banner config:{}", banners.get(entityType.get()));
-            }
-            else
-                LOGGER.error("cannot be resolved name: {}", id);
+        addedList = MONSTER_IDS_ADDED.get();
+        excludedList = MONSTER_IDS_EXCLUDED.get();
+        onlyList = MONSTER_IDS_ONLY.get();
+        specialBasicKills = new HashMap<>();
+        for (String special : SPECIAL_BASIC_KILLS.get()) {
+            String[] split = special.split("=");
+            specialBasicKills.put(split[0].strip(), Integer.parseInt(split[1].strip()));
         }
     }
 
     public static boolean contains(String key){
-        Optional<EntityType<?>> optionalEntityType = EntityType.byString(key);
-        return optionalEntityType.filter(entityType -> banners.containsKey(entityType)).isPresent();
+        boolean reuslt = false;
+        if (key == null || key.isEmpty())
+            return reuslt;
+        if (EntityType.byString(key).isPresent())
+            reuslt = true;
+        if (!EntityType.byString(key).get().getCategory().equals(MobCategory.MONSTER))
+            reuslt = false;
+        if (addedList.contains(key))
+            reuslt = true;
+        if (excludedList.contains(key))
+            reuslt = false;
+        if (!onlyList.isEmpty())
+            reuslt = onlyList.contains(key);
+        return reuslt;
     }
 
     public static Banner getBanner(String key){
@@ -95,8 +84,9 @@ public class BannerConfig {
     }
 
     public static Banner getBanner(EntityType<?> entityType){
-        if (banners.containsKey(entityType)) {
-            return banners.get(entityType);
+        String key = EntityType.getKey(entityType).toString();
+        if (contains(key)){
+            return new Banner(key, specialBasicKills.containsKey(key) ? specialBasicKills.get(key) : basicKills);
         }
         return null;
     }
