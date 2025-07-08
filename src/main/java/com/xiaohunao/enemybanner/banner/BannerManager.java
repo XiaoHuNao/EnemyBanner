@@ -1,8 +1,8 @@
 package com.xiaohunao.enemybanner.banner;
 
+import com.mojang.logging.LogUtils;
 import com.xiaohunao.enemybanner.EnemyBanner;
 import com.xiaohunao.enemybanner.blocks.EnemyBannerBlockEntity;
-import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -57,7 +57,7 @@ public class BannerManager {
 
     @SubscribeEvent
     public static void onPlayerKillLivingEntity(LivingDeathEvent event){
-        if (event.getSource().getEntity() instanceof Player player) {
+        if (event.getSource() != null && event.getSource().getEntity() instanceof Player player) {
             ifInRangeEntity(player, blockEntity -> BannerBehaviorProvider.getInstance().getBannerBehavior(blockEntity.getParameters().getSilksId()).onPlayerKillLivingEntity(player, event.getEntity()));
         }
     }

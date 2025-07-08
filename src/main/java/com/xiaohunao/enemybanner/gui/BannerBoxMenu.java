@@ -1,22 +1,20 @@
 package com.xiaohunao.enemybanner.gui;
 
-import com.xiaohunao.enemybanner.AttachmentType.AttachmentTypeRegister;
-import com.xiaohunao.enemybanner.AttachmentType.PlayerBannerData;
+import com.xiaohunao.enemybanner.AttachmentTypeRegister;
 import com.xiaohunao.enemybanner.BannerConfig;
 import com.xiaohunao.enemybanner.BannerParameters;
+import com.xiaohunao.enemybanner.BannerUtils;
 import com.xiaohunao.enemybanner.items.ItemRegister;
 import com.xiaohunao.enemybanner.items.SilksItem;
-import com.xiaohunao.enemybanner.payloads.PlayerBannerDataPayload;
+import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
 import com.mojang.logging.LogUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.ServerStatsCounter;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -25,16 +23,15 @@ import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class BannerBoxMenu extends ItemCombinerMenu {
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    private Map<String, PlayerBannerData> playerBannerDataMap;
+    private Map<String, Integer> playerBannerCount;
 
     private Inventory playerInv;
 
-    private BannerParameters parameters;
+    private String selectedKey;
 
     public BannerBoxMenu(int containerId, Inventory playerInv, FriendlyByteBuf buf) {
         this(containerId, playerInv, ContainerLevelAccess.NULL);
@@ -43,9 +40,8 @@ public class BannerBoxMenu extends ItemCombinerMenu {
     public BannerBoxMenu(int containerId, Inventory playerInv, ContainerLevelAccess access){
         super(Menus.BANNER_BOX_MENU.get(), containerId, playerInv, access);
         this.playerInv = playerInv;
-        playerBannerDataMap = new HashMap<>();
+        playerBannerCount = new HashMap<>();
         loadBannerMap();
-        parameters = new BannerParameters(!playerBannerDataMap.isEmpty() ? playerBannerDataMap.keySet().iterator().next() : "minecraft:zombie");
     }
 
     @Override
@@ -61,13 +57,16 @@ public class BannerBoxMenu extends ItemCombinerMenu {
         if (!silks.isEmpty()){
             silks.setCount(silks.getCount() - 1);
         }
-        PlayerBannerData data = playerBannerDataMap.get(parameters.getMonsterId());
-        data.setUsedCount(data.getUsedCount() + 1);
-        data.setCanUsedCount(Math.max(0, data.getCanUsedCount() - 1));
-        playerBannerDataMap.put(parameters.getMonsterId(), data);
-        player.setData(AttachmentTypeRegister.PLAYER_BANNER_DATA, playerBannerDataMap);
+        BannerConfig.Banner banner = BannerConfig.getBanner(selectedKey);
+        if (banner != null && playerBannerCount.get(banner.monsterId) >= banner.basicKills) {
+            HashMap<String, Integer> tmpMap = new HashMap<>(playerBannerCount);
+            tmpMap.put(banner.monsterId, playerBannerCount.get(banner.monsterId) - banner.basicKills);
+            player.setData(AttachmentTypeRegister.PLAYER_BANNER_COUNT, tmpMap);
+            playerBannerCount = tmpMap;
+        }
+        updateBannerMap();
         loadBannerMap();
-        createResult();
+        setSelected(selectedKey);
     }
 
     @Override
@@ -78,9 +77,9 @@ public class BannerBoxMenu extends ItemCombinerMenu {
 
     @Override
     public void createResult() {
-        if (getSlot(0).hasItem() && playerBannerDataMap.get(parameters.getMonsterId()).getCanUsedCount() > 0){
+        if (selectedKey != null && getSlot(0).hasItem() && playerBannerCount.containsKey(selectedKey) && playerBannerCount.get(selectedKey) >= BannerConfig.getBanner(selectedKey).basicKills){
             ItemStack stack = ItemRegister.ENEMY_BANNER.toStack();
-            stack.set(BannerParameters.BANNER_DATA_COMPONENT, parameters);
+            stack.set(BannerParameters.BANNER_DATA_COMPONENT, new BannerParameters(selectedKey, DyeColor.WHITE.getId(), getSilksId()));
             this.resultSlots.setItem(0, stack);
             this.broadcastChanges();
         }
@@ -89,9 +88,17 @@ public class BannerBoxMenu extends ItemCombinerMenu {
         }
     }
 
-    public void setSelected(BannerParameters parameters){
-        this.parameters = parameters;
+    public void setSelected(String key){
+        BannerConfig.Banner banner = BannerConfig.getBanner(key);
+        if (banner != null && playerBannerCount.get(banner.monsterId) >= banner.basicKills)
+            this.selectedKey = key;
+        else
+            this.selectedKey = "";
         createResult();
+    }
+
+    public String getSilksId(){
+        return  (getSlot(1).hasItem() ? getSlot(1).getItem().getItem().toString() : ItemRegister.BASIC_SILKS.getRegisteredName()).split(":")[1];
     }
 
     @Override
@@ -104,34 +111,27 @@ public class BannerBoxMenu extends ItemCombinerMenu {
     }
 
     private void loadBannerMap(){
-        Player player = playerInv.player;
-        if (player.hasData(AttachmentTypeRegister.PLAYER_BANNER_DATA.get())) {
-            playerBannerDataMap = player.getData(AttachmentTypeRegister.PLAYER_BANNER_DATA.get());
+
+        if (player.hasData(AttachmentTypeRegister.PLAYER_BANNER_COUNT)){
+            playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
         }
+
         if(!player.level().isClientSide()){
             ServerPlayer serverPlayer = player.getServer().getPlayerList().getPlayer(player.getUUID());
-            Set<EntityType<?>> entityTypes = BannerConfig.banners.keySet();
-            ServerStatsCounter status = serverPlayer.getStats();
-            Map<String, Integer> killCount = new HashMap<>();
-            for (EntityType<?> entityType : entityTypes ){
-                int value = status.getValue(Stats.ENTITY_KILLED, entityType);
-                killCount.put(EntityType.getKey(entityType).toString(), value);
-            }
-            for (String key : killCount.keySet()){
-                if (playerBannerDataMap.containsKey(key)) {
-                    PlayerBannerData playerBannerData = playerBannerDataMap.get(key);
-                    BannerConfig.Banner banner = BannerConfig.getBanner(key);
-                    if (banner != null){
-                        playerBannerData.setCanUsedCount(Math.max(0, (killCount.get(key) / banner.basicKills) - playerBannerData.getUsedCount()));
-                    }
-                } else
-                    playerBannerDataMap.put(key, new PlayerBannerData(key, 0, killCount.get(key)));
-            }
-            PacketDistributor.sendToPlayer(serverPlayer, new PlayerBannerDataPayload(playerBannerDataMap, playerBannerDataMap.keySet().iterator().next(), ItemRegister.BASIC_SILKS.getId().getPath()));
+            PacketDistributor.sendToPlayer(serverPlayer, new PlayerBannerCountPayload(playerBannerCount, ""));
         }
     }
 
-    public Map<String, PlayerBannerData> getPlayerBannerData(){
-        return this.playerBannerDataMap;
+    private void updateBannerMap(){
+        if (player.level().isClientSide()){
+            PacketDistributor.sendToServer(new PlayerBannerCountPayload(playerBannerCount, selectedKey));
+        }
+        if (player.hasData(AttachmentTypeRegister.PLAYER_BANNER_COUNT)){
+            playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
+        }
+    }
+
+    public Map<String, Integer> getPlayerBannerCount(){
+        return this.playerBannerCount;
     }
 }

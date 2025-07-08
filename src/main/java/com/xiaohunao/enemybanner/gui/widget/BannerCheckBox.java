@@ -60,7 +60,7 @@ public class BannerCheckBox extends AbstractButton {
 
     @Override
     public void onPress() {
-        setSelected(!isSelected);
+        setSelected(true);
     }
 
     @Override

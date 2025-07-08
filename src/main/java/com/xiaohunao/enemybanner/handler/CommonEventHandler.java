@@ -4,7 +4,7 @@ import com.xiaohunao.enemybanner.EnemyBanner;
 import com.xiaohunao.enemybanner.gui.BannerBoxScreen;
 import com.xiaohunao.enemybanner.gui.Menus;
 import com.xiaohunao.enemybanner.payloads.ClientPayloadHandler;
-import com.xiaohunao.enemybanner.payloads.PlayerBannerDataPayload;
+import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
 import com.xiaohunao.enemybanner.payloads.ServerPayloadHandler;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -25,8 +25,8 @@ public class CommonEventHandler {
     public static void registerPayloadHandler(RegisterPayloadHandlersEvent event){
         final PayloadRegistrar registrar = event.registrar("1");
         registrar.playBidirectional(
-                PlayerBannerDataPayload.TYPE,
-                PlayerBannerDataPayload.STREAM_CODEC,
+                PlayerBannerCountPayload.TYPE,
+                PlayerBannerCountPayload.STREAM_CODEC,
                 new DirectionalPayloadHandler<>(ClientPayloadHandler::handle, ServerPayloadHandler::handle)
         );
     }

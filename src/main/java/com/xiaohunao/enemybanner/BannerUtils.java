@@ -15,13 +15,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class BannerUtils {
@@ -91,11 +94,5 @@ public class BannerUtils {
         entityRenderDispatcher.setRenderShadow(false);
         entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, 0f, 0f, poseStack, bufferSource, packedLight);
         entityRenderDispatcher.setRenderShadow(true);
-    }
-
-    public static ItemStack createBannerItem(BannerParameters banner){
-        ItemStack itemStack = new ItemStack(ItemRegister.ENEMY_BANNER.get());
-        itemStack.set(BannerParameters.BANNER_DATA_COMPONENT, banner);
-        return itemStack;
     }
 }

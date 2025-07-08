@@ -1,6 +1,5 @@
 package com.xiaohunao.enemybanner;
 
-import com.xiaohunao.enemybanner.AttachmentType.AttachmentTypeRegister;
 import com.xiaohunao.enemybanner.banner.BannerManager;
 import com.xiaohunao.enemybanner.blocks.BlockRegister;
 import com.xiaohunao.enemybanner.items.SilksItem;
