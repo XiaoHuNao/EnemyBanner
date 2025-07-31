@@ -1,10 +1,11 @@
 package com.xiaohunao.enemybanner;
 
-import com.xiaohunao.enemybanner.items.ItemRegister;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.xiaohunao.enemybanner.items.ItemRegister;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.DyeColor;
@@ -16,7 +17,7 @@ import java.util.Objects;
 
 public class BannerParameters {
 
-    public static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(EnemyBanner.MODID);
+    public static final DeferredRegister.DataComponents DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, EnemyBanner.MODID);
 
     public static final Codec<BannerParameters> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
