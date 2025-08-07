@@ -8,10 +8,13 @@ import com.xiaohunao.enemybanner.gui.Menus;
 import com.xiaohunao.enemybanner.handler.ServerEventHandler;
 import com.xiaohunao.enemybanner.items.ItemRegister;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.item.CreativeModeTab;
@@ -106,5 +109,20 @@ public class EnemyBanner
                 return bannerWithoutLevelRenderer;
             }
         }, ItemRegister.ENEMY_BANNER.get(), ItemRegister.ENEMY_BANNER_PLANE.get());
+    }
+
+    public static ResourceLocation asResource(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    }
+
+    public static String asDescriptionId(String path) {
+        return MODID + "." + path;
+    }
+
+    public static <T> ResourceKey<Registry<T>> asResourceKey(String path) {
+        return ResourceKey.createRegistryKey(asResource(path));
+    }
+    public static <T> ResourceKey<T> asResourceKey(ResourceKey<? extends Registry<T>> registryKey, String path) {
+        return ResourceKey.create(registryKey, asResource(path));
     }
 }

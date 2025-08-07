@@ -4,6 +4,8 @@ import com.xiaohunao.enemybanner.AttachmentTypeRegister;
 import com.xiaohunao.enemybanner.BannerConfig;
 import com.xiaohunao.enemybanner.BannerUtils;
 import com.xiaohunao.enemybanner.EnemyBanner;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -39,6 +41,18 @@ public class ServerEventHandler {
                 Integer lastValue = playerData.getOrDefault(key, 0);
                 playerData.put(key, Math.max(lastValue + 1, 0));
                 player.setData(AttachmentTypeRegister.PLAYER_BANNER_COUNT, playerData);
+
+                int basicKills = BannerConfig.getBasicKills(key);
+                if (playerData.get(key) % basicKills == 0) {
+                    //”<玩家名>击败了<X>个<生物名>，该旗帜已在旗帜盒中解锁“
+                    MutableComponent message = Component.translatable(
+                            EnemyBanner.asDescriptionId("message.player.killcount"),
+                            player.getName(),
+                            playerData.get(key),
+                            event.getEntity().getName()
+                    );
+                    player.sendSystemMessage(message);
+                }
             }
         }
     }

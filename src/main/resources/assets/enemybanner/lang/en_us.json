@@ -16,5 +16,7 @@
   "item.enemybanner.range_silks": "Range Silks",
   "item.enemybanner.resist_silks": "Resist Silks",
 
-  "effect.enemybanner.enemybanner_effect": "Enemy Banner"
+  "effect.enemybanner.enemybanner_effect": "Enemy Banner",
+
+  "enemybanner.message.player.killcount": "%1$s has defeated %2$d %3$s, unlocking them in the Banner Box"
 }

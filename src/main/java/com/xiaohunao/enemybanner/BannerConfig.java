@@ -91,6 +91,13 @@ public class BannerConfig {
         return null;
     }
 
+    public static int getBasicKills(String key){
+        if (specialBasicKills.containsKey(key)) {
+            return specialBasicKills.get(key);
+        }
+        return basicKills;
+    }
+
     public static class Banner implements Serializable {
         @Serial
         private static final long serialVersionUID = 1L;
