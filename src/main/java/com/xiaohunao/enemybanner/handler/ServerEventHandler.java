@@ -44,11 +44,11 @@ public class ServerEventHandler {
                 if (kills % basicKills == 0) {
                     String k;
                     if (kills == basicKills) {
-                        //“<玩家名>击败了<X>个<生物名>”
-                        k = EnemyBanner.asDescriptionId("message.player.killcount.short");
-                    } else {
                         //“<玩家名>击败了<X>个<生物名>，该旗帜已在旗帜盒中解锁”
                         k = EnemyBanner.asDescriptionId("message.player.killcount");
+                    } else {
+                        //“<玩家名>击败了<X>个<生物名>”
+                        k = EnemyBanner.asDescriptionId("message.player.killcount.short");
                     }
                     player.sendSystemMessage(Component.translatable(k, player.getName(), kills, event.getEntity().getName()).withColor(0xfff014));
                 }
