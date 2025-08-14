@@ -17,5 +17,6 @@
   "item.enemybanner.resist_silks": "抗性丝绸",
 
   "effect.enemybanner.enemybanner_effect": "敌怪旗",
-  "enemybanner.message.player.killcount": "%1$s 击败了 %2$d 个 %3$s，已在旗帜盒中解锁"
+  "enemybanner.message.player.killcount": "%1$s 击败了 %2$d 个 %3$s，已在旗帜盒中解锁",
+  "enemybanner.message.player.killcount.short": "%1$s 击败了 %2$d 个 %3$s"
 }
