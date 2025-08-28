@@ -1,7 +1,7 @@
 package com.xiaohunao.enemybanner.payloads;
 
-import com.xiaohunao.enemybanner.AttachmentTypeRegister;
 import com.mojang.logging.LogUtils;
+import com.xiaohunao.enemybanner.AttachmentTypeRegister;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;

@@ -1,5 +1,6 @@
 package com.xiaohunao.enemybanner.gui;
 
+import com.mojang.logging.LogUtils;
 import com.xiaohunao.enemybanner.BannerConfig;
 import com.xiaohunao.enemybanner.BannerParameters;
 import com.xiaohunao.enemybanner.EnemyBanner;
@@ -8,7 +9,6 @@ import com.xiaohunao.enemybanner.gui.widget.ListWidget;
 import com.xiaohunao.enemybanner.gui.widget.ScrollBar;
 import com.xiaohunao.enemybanner.gui.widget.ScrollWidget;
 import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;

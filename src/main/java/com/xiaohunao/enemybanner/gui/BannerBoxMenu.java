@@ -1,18 +1,19 @@
 package com.xiaohunao.enemybanner.gui;
 
+import com.mojang.logging.LogUtils;
 import com.xiaohunao.enemybanner.AttachmentTypeRegister;
 import com.xiaohunao.enemybanner.BannerConfig;
 import com.xiaohunao.enemybanner.BannerParameters;
-import com.xiaohunao.enemybanner.BannerUtils;
 import com.xiaohunao.enemybanner.items.ItemRegister;
 import com.xiaohunao.enemybanner.items.SilksItem;
 import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
-import com.mojang.logging.LogUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ItemCombinerMenu;
+import net.minecraft.world.inventory.ItemCombinerMenuSlotDefinition;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;

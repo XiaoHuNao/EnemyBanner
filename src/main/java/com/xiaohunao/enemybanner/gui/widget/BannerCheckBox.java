@@ -1,9 +1,9 @@
 package com.xiaohunao.enemybanner.gui.widget;
 
+import com.mojang.logging.LogUtils;
 import com.xiaohunao.enemybanner.BannerParameters;
 import com.xiaohunao.enemybanner.gui.BannerBoxScreen;
 import com.xiaohunao.enemybanner.items.ItemRegister;
-import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;

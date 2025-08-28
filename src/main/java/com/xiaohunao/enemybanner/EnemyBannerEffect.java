@@ -1,7 +1,7 @@
 package com.xiaohunao.enemybanner;
 
-import com.xiaohunao.enemybanner.banner.BannerManager;
 import com.mojang.logging.LogUtils;
+import com.xiaohunao.enemybanner.banner.BannerManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;

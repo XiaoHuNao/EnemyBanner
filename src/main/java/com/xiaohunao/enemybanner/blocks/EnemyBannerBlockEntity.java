@@ -1,8 +1,8 @@
 package com.xiaohunao.enemybanner.blocks;
 
+import com.mojang.logging.LogUtils;
 import com.xiaohunao.enemybanner.BannerParameters;
 import com.xiaohunao.enemybanner.banner.BannerManager;
-import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
