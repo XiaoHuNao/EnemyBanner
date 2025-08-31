@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class EnemyBannerBlockEntity extends BlockEntity {
@@ -34,7 +33,7 @@ public class EnemyBannerBlockEntity extends BlockEntity {
     public void onLoad() {
         super.onLoad();
         if (getLevel() != null)
-            BannerManager.add(Map.entry(getLevel(), getBlockPos()));
+            BannerManager.add(getLevel(), getBlockPos());
     }
 
     public ClientboundBlockEntityDataPacket getUpdatePacket() {

@@ -23,7 +23,7 @@ public class EnemyBannerEffect extends MobEffect {
 
     @Override
     public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
-        return true;
+        return duration % 60 == 0;
     }
 
     @Override
