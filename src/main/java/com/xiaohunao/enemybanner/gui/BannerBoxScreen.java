@@ -118,7 +118,9 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
         super.mouseMoved(mouseX, mouseY);
-        scrollBar.getScrollBlock().mouseMoved(mouseX, mouseY);
+        if (scrollBar != null) {
+            scrollBar.getScrollBlock().mouseMoved(mouseX, mouseY);
+        }
     }
 
     private class RadioBoxManager{
