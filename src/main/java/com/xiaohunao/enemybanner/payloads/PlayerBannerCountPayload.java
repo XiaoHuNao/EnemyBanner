@@ -2,26 +2,22 @@ package com.xiaohunao.enemybanner.payloads;
 
 import com.xiaohunao.enemybanner.EnemyBanner;
 import io.netty.buffer.ByteBuf;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public record PlayerBannerCountPayload(Map<String, Integer> playerBannerCount, String monsterId) implements CustomPacketPayload {
-    public static final Type<PlayerBannerCountPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(EnemyBanner.MODID, "player_banner_count"));
-
+public record PlayerBannerCountPayload(Object2IntOpenHashMap<String> playerBannerCount, String monsterId) implements CustomPacketPayload {
+    public static final Type<PlayerBannerCountPayload> TYPE = new Type<>(EnemyBanner.asResource("player_banner_count"));
     public static final StreamCodec<ByteBuf, PlayerBannerCountPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(value -> new HashMap<>(), ByteBufCodecs.STRING_UTF8, ByteBufCodecs.INT, Integer.MAX_VALUE), PlayerBannerCountPayload::playerBannerCount,
+            ByteBufCodecs.map(Object2IntOpenHashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.INT), PlayerBannerCountPayload::playerBannerCount,
             ByteBufCodecs.STRING_UTF8, PlayerBannerCountPayload::monsterId,
             PlayerBannerCountPayload::new
     );
 
     @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
+    public @NotNull Type<PlayerBannerCountPayload> type() {
         return TYPE;
     }
 }

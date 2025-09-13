@@ -12,7 +12,8 @@ public class ServerPayloadHandler{
 
     public static void handle(@NotNull PlayerBannerCountPayload data, @NotNull IPayloadContext context){
         context.player().setData(AttachmentTypeRegister.PLAYER_BANNER_COUNT, data.playerBannerCount());
-        BannerBoxMenu bannerBoxMenu = (BannerBoxMenu) context.player().containerMenu;
-        bannerBoxMenu.setSelected(data.monsterId());
+        if (context.player().containerMenu instanceof BannerBoxMenu menu) {
+            menu.setSelected(data.monsterId());
+        }
     }
 }

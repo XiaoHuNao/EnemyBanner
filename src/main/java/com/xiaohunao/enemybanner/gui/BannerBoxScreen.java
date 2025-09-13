@@ -9,6 +9,7 @@ import com.xiaohunao.enemybanner.gui.widget.ListWidget;
 import com.xiaohunao.enemybanner.gui.widget.ScrollBar;
 import com.xiaohunao.enemybanner.gui.widget.ScrollWidget;
 import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;
@@ -30,7 +31,7 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
     private ListWidget listWidget;
     private ScrollBar scrollBar;
     private Map<String, BannerCheckBox> bannerCheckBoxMap;
-    private Map<String, Integer> bannerCount;
+    private Object2IntOpenHashMap<String> bannerCount;
 
     private boolean hasBannerInput;
 
@@ -58,7 +59,7 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
 
         addWidget(bannerScroll);
         for (String key : bannerCount.keySet()){
-            if (BannerConfig.contains(key) && bannerCount.get(key) >= Objects.requireNonNull(BannerConfig.getBanner(key)).basicKills)
+            if (BannerConfig.contains(key) && bannerCount.getInt(key) >= Objects.requireNonNull(BannerConfig.getBanner(key)).basicKills)
                 addNewBannerCheckBox(new BannerParameters(key));
         }
 
@@ -79,7 +80,7 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
         for (BannerCheckBox checkBox : bannerCheckBoxMap.values()) {
             checkBox.getParameters().setSilksId(menu.getSilksId());
             bannerCount = menu.getPlayerBannerCount();
-            int count = bannerCount.get(checkBox.getParameters().getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(checkBox.getParameters().getMonsterId())).basicKills;
+            int count = bannerCount.getInt(checkBox.getParameters().getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(checkBox.getParameters().getMonsterId())).basicKills;
             checkBox.setBannerCount(count);
         }
     }
@@ -100,7 +101,7 @@ public class BannerBoxScreen extends ItemCombinerScreen<BannerBoxMenu> {
 
     private void addNewBannerCheckBox(BannerParameters parameters){
         BannerCheckBox bannerCheckBox = new BannerCheckBox(parameters.getMonsterId(), parameters, 22, 42, Component.empty());
-        bannerCheckBox.setBannerCount(bannerCount.get(parameters.getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(parameters.getMonsterId())).basicKills);
+        bannerCheckBox.setBannerCount(bannerCount.getInt(parameters.getMonsterId()) / Objects.requireNonNull(BannerConfig.getBanner(parameters.getMonsterId())).basicKills);
         listWidget.add(bannerCheckBox);
         bannerCheckBoxMap.put(parameters.getMonsterId(), bannerCheckBox);
     }

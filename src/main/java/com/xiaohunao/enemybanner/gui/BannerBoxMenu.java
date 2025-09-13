@@ -7,6 +7,7 @@ import com.xiaohunao.enemybanner.BannerParameters;
 import com.xiaohunao.enemybanner.items.ItemRegister;
 import com.xiaohunao.enemybanner.items.SilksItem;
 import com.xiaohunao.enemybanner.payloads.PlayerBannerCountPayload;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,13 +23,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class BannerBoxMenu extends ItemCombinerMenu {
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    private Map<String, Integer> playerBannerCount;
+    private Object2IntOpenHashMap<String> playerBannerCount;
 
     private Inventory playerInv;
 
@@ -38,10 +36,10 @@ public class BannerBoxMenu extends ItemCombinerMenu {
         this(containerId, playerInv, ContainerLevelAccess.NULL);
     }
 
-    public BannerBoxMenu(int containerId, Inventory playerInv, ContainerLevelAccess access){
+    public BannerBoxMenu(int containerId, Inventory playerInv, ContainerLevelAccess access) {
         super(Menus.BANNER_BOX_MENU.get(), containerId, playerInv, access);
         this.playerInv = playerInv;
-        playerBannerCount = new HashMap<>();
+        playerBannerCount = new Object2IntOpenHashMap<>();
         loadBannerMap();
     }
 
@@ -55,13 +53,13 @@ public class BannerBoxMenu extends ItemCombinerMenu {
         ItemStack bannerInput = this.inputSlots.getItem(0);
         ItemStack silks = this.inputSlots.getItem(1);
         bannerInput.setCount(bannerInput.getCount() - 1);
-        if (!silks.isEmpty()){
+        if (!silks.isEmpty()) {
             silks.setCount(silks.getCount() - 1);
         }
         BannerConfig.Banner banner = BannerConfig.getBanner(selectedKey);
-        if (banner != null && playerBannerCount.get(banner.monsterId) >= banner.basicKills) {
-            HashMap<String, Integer> tmpMap = new HashMap<>(playerBannerCount);
-            tmpMap.put(banner.monsterId, playerBannerCount.get(banner.monsterId) - banner.basicKills);
+        if (banner != null && playerBannerCount.getInt(banner.monsterId) >= banner.basicKills) {
+            Object2IntOpenHashMap<String> tmpMap = new Object2IntOpenHashMap<>(playerBannerCount);
+            tmpMap.put(banner.monsterId, playerBannerCount.getInt(banner.monsterId) - banner.basicKills);
             player.setData(AttachmentTypeRegister.PLAYER_BANNER_COUNT, tmpMap);
             playerBannerCount = tmpMap;
         }
@@ -78,28 +76,27 @@ public class BannerBoxMenu extends ItemCombinerMenu {
 
     @Override
     public void createResult() {
-        if (selectedKey != null && getSlot(0).hasItem() && playerBannerCount.containsKey(selectedKey) && playerBannerCount.get(selectedKey) >= BannerConfig.getBanner(selectedKey).basicKills){
+        if (selectedKey != null && getSlot(0).hasItem() && playerBannerCount.containsKey(selectedKey) && playerBannerCount.getInt(selectedKey) >= BannerConfig.getBanner(selectedKey).basicKills) {
             ItemStack stack = ItemRegister.ENEMY_BANNER.toStack();
             stack.set(BannerParameters.BANNER_DATA_COMPONENT, new BannerParameters(selectedKey, DyeColor.WHITE.getId(), getSilksId()));
             this.resultSlots.setItem(0, stack);
             this.broadcastChanges();
-        }
-        else {
+        } else {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
         }
     }
 
-    public void setSelected(String key){
+    public void setSelected(String key) {
         BannerConfig.Banner banner = BannerConfig.getBanner(key);
-        if (banner != null && playerBannerCount.get(banner.monsterId) >= banner.basicKills)
+        if (banner != null && playerBannerCount.getInt(banner.monsterId) >= banner.basicKills)
             this.selectedKey = key;
         else
             this.selectedKey = "";
         createResult();
     }
 
-    public String getSilksId(){
-        return  (getSlot(1).hasItem() ? getSlot(1).getItem().getItem().toString() : ItemRegister.BASIC_SILKS.getRegisteredName()).split(":")[1];
+    public String getSilksId() {
+        return (getSlot(1).hasItem() ? getSlot(1).getItem().getItem().toString() : ItemRegister.BASIC_SILKS.getRegisteredName()).split(":")[1];
     }
 
     @Override
@@ -111,28 +108,23 @@ public class BannerBoxMenu extends ItemCombinerMenu {
                 .build();
     }
 
-    private void loadBannerMap(){
+    private void loadBannerMap() {
+        playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
 
-        if (player.hasData(AttachmentTypeRegister.PLAYER_BANNER_COUNT)){
-            playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
-        }
-
-        if(!player.level().isClientSide()){
+        if (!player.level().isClientSide) {
             ServerPlayer serverPlayer = player.getServer().getPlayerList().getPlayer(player.getUUID());
             PacketDistributor.sendToPlayer(serverPlayer, new PlayerBannerCountPayload(playerBannerCount, ""));
         }
     }
 
-    private void updateBannerMap(){
-        if (player.level().isClientSide()){
+    private void updateBannerMap() {
+        if (player.level().isClientSide) {
             PacketDistributor.sendToServer(new PlayerBannerCountPayload(playerBannerCount, selectedKey));
         }
-        if (player.hasData(AttachmentTypeRegister.PLAYER_BANNER_COUNT)){
-            playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
-        }
+        playerBannerCount = player.getData(AttachmentTypeRegister.PLAYER_BANNER_COUNT);
     }
 
-    public Map<String, Integer> getPlayerBannerCount(){
+    public Object2IntOpenHashMap<String> getPlayerBannerCount() {
         return this.playerBannerCount;
     }
 }

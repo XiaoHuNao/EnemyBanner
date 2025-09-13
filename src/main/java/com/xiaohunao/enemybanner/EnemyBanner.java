@@ -16,8 +16,10 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -37,8 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 @Mod(EnemyBanner.MODID)
-public class EnemyBanner
-{
+public class EnemyBanner {
     public static final String MODID = "enemybanner";
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -52,7 +53,7 @@ public class EnemyBanner
                     .displayItems(((parameters, output) -> {
                         output.accept(ItemRegister.ENEMY_BANNER);
                         output.accept(ItemRegister.BANNER_BOX);
-                        for (DeferredItem<SilksItem> item : ItemRegister.SILKS_MAP.values()){
+                        for (DeferredItem<SilksItem> item : ItemRegister.SILKS_MAP.values()) {
                             output.accept(item.get().asItem());
                         }
                     }))
@@ -63,7 +64,9 @@ public class EnemyBanner
 
     public static final DeferredHolder<MobEffect, EnemyBannerEffect> ENEMY_BANNER_EFFECT = MOB_EFFECTS.register("enemybanner_effect", () -> new EnemyBannerEffect(MobEffectCategory.BENEFICIAL, 0xffffff));
 
-    public EnemyBanner(IEventBus modEventBus, ModContainer modContainer){
+    public static final TagKey<EntityType<?>> DENIED_ENTITIES = TagKey.create(Registries.ENTITY_TYPE, asResource("denied_entities"));
+
+    public EnemyBanner(IEventBus modEventBus, ModContainer modContainer) {
 
         BannerParameters.register(modEventBus);
         AttachmentTypeRegister.register(modEventBus);
@@ -82,7 +85,7 @@ public class EnemyBanner
     }
 
     @SubscribeEvent
-    public static void gatherData(GatherDataEvent event){
+    public static void gatherData(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
         PackOutput packOutput = generator.getPackOutput();
         ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
@@ -99,9 +102,10 @@ public class EnemyBanner
 
 
     @SubscribeEvent
-    public static void registerClientExtensions(RegisterClientExtensionsEvent event){
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
         event.registerItem(new IClientItemExtensions() {
             private final BannerWithoutLevelRenderer bannerWithoutLevelRenderer = new BannerWithoutLevelRenderer();
+
             @Override
             public @NotNull BlockEntityWithoutLevelRenderer getCustomRenderer() {
                 return bannerWithoutLevelRenderer;
@@ -120,6 +124,7 @@ public class EnemyBanner
     public static <T> ResourceKey<Registry<T>> asResourceKey(String path) {
         return ResourceKey.createRegistryKey(asResource(path));
     }
+
     public static <T> ResourceKey<T> asResourceKey(ResourceKey<? extends Registry<T>> registryKey, String path) {
         return ResourceKey.create(registryKey, asResource(path));
     }
