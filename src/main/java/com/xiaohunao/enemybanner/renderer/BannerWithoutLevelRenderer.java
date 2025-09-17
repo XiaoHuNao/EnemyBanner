@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.xiaohunao.enemybanner.BannerParameters;
-import com.xiaohunao.enemybanner.BannerUtils;
+import com.xiaohunao.enemybanner.BannerRenderUtils;
 import com.xiaohunao.enemybanner.items.ItemRegister;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -35,7 +35,7 @@ public class BannerWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer 
         poseStack.pushPose();
         poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
 
-        if (stack.getItemHolder().getRegisteredName().equals(ItemRegister.ENEMY_BANNER_PLANE.getRegisteredName())){
+        if (stack.is(ItemRegister.ENEMY_BANNER_PLANE)){
             pole.visible = false;
             bar.visible = false;
         }
@@ -47,7 +47,7 @@ public class BannerWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer 
 
         BannerParameters bannerParameters = stack.get(BannerParameters.BANNER_DATA_COMPONENT);
         if (bannerParameters != null) {
-            BannerUtils.renderBannerFlag(bannerParameters, flag, poseStack, buffer, packedLight, packedOverlay);
+            BannerRenderUtils.renderBannerFlag(bannerParameters, flag, poseStack, buffer, packedLight, packedOverlay);
         }
         poseStack.popPose();
     }

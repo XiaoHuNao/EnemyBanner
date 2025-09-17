@@ -3,7 +3,7 @@ package com.xiaohunao.enemybanner.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import com.xiaohunao.enemybanner.BannerUtils;
+import com.xiaohunao.enemybanner.BannerRenderUtils;
 import com.xiaohunao.enemybanner.EnemyBanner;
 import com.xiaohunao.enemybanner.blocks.EnemyBannerBlock;
 import com.xiaohunao.enemybanner.blocks.EnemyBannerBlockEntity;
@@ -97,7 +97,7 @@ public class EnemyBannerRenderer implements BlockEntityRenderer<EnemyBannerBlock
         this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(((float)Math.PI * 2F) * f2)) * (float)Math.PI;
         this.flag.y = -32.0F;
 
-        BannerUtils.renderBannerFlag(blockEntity.getParameters(), flag, poseStack, bufferSource, packedLight, packedOverlay);
+        BannerRenderUtils.renderBannerFlag(blockEntity.getParameters(), flag, poseStack, bufferSource, packedLight, packedOverlay);
 
         poseStack.popPose();
         poseStack.popPose();
@@ -110,7 +110,7 @@ public class EnemyBannerRenderer implements BlockEntityRenderer<EnemyBannerBlock
         flag.translateAndRotate(poseStack);
         poseStack.translate(0.0D, 0.0D, -0.15D);
         if (Minecraft.getInstance().level != null) {
-            BannerUtils.renderEntityToBanner(entityRenderDispatcher, monster,poseStack, buffer, packedLight);
+            BannerRenderUtils.renderEntityToBanner(entityRenderDispatcher, monster,poseStack, buffer, packedLight);
         }
         poseStack.popPose();
     }
