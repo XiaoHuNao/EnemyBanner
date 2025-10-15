@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.function.Consumer;
 
-@EventBusSubscriber(modid = EnemyBanner.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.DEDICATED_SERVER)
+@EventBusSubscriber(modid = EnemyBanner.MODID, value = Dist.DEDICATED_SERVER)
 public class BannerManager {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final int BASIC_RANGE = 16;

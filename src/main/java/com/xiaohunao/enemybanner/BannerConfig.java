@@ -13,7 +13,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
-@EventBusSubscriber(modid = com.xiaohunao.enemybanner.EnemyBanner.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = com.xiaohunao.enemybanner.EnemyBanner.MODID)
 public class BannerConfig {
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();

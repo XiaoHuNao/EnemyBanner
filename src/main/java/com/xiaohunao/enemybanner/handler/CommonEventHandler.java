@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = EnemyBanner.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = EnemyBanner.MODID)
 public class CommonEventHandler {
 
     @SubscribeEvent
