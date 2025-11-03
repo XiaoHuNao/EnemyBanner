@@ -63,10 +63,7 @@ public class BannerConfig {
         boolean reuslt = false;
         if (key == null || key.isEmpty())
             return reuslt;
-        if (EntityType.byString(key).isPresent())
-            reuslt = true;
-        if (!EntityType.byString(key).get().getCategory().equals(MobCategory.MONSTER))
-            reuslt = false;
+        reuslt = EntityType.byString(key).map(type -> type.getCategory().equals(MobCategory.MONSTER)).orElse(false);
         if (addedList.contains(key))
             reuslt = true;
         if (excludedList.contains(key))
